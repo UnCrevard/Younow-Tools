@@ -1,0 +1,11 @@
+git commit -m xxx
+npm version patch
+npm publish
+git push
+#
+#
+#
+npm config ls
+
+npm unpublish younow-tools@1.0.9
+npm show younow-tools@* version

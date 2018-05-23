@@ -18,10 +18,13 @@ To update younow-tools just type :
 
 ### Change log
 
-20170504 fix : linux compatibility
-20170506 add : option --locale
-20170507 add : command follow
-20170510 add : command followed & fix follow "soon..."
+* 20180523 fix : Using rtmp stream now (HLS has been removed from Younow Website = Flash Only) so FFMPEG is mandatory now. You can get it from https://ffmpeg.zeranoe.com/builds/
+
+	*rewind is unavailable with rtmp*. 
+* 20170504 fix : linux compatibility 
+* 20170506 add : option --locale 
+* 20170507 add : command follow 
+* 20170510 add : command followed & fix follow "soon..." 
 
 ## Summary
 
@@ -378,6 +381,6 @@ To compile the source (.ts) you need typescript (VSCode or Atom editor) and shar
 
 Report any bug or missing feature at your will.
 
-If you like this software, please consider a Bitcoin donation to bitcoin://34fygtqeAP62xixpTj6w9XTtfKmqjFqpo6
+If you like this software, please consider a Bitcoin donation to bitcoin:// 	14bpqrNgreKaFtLaK85ArtcUKyAxuKpwJM
 
 # Enjoy !

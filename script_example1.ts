@@ -95,7 +95,7 @@ function main()
 				{
 					if (comment.comment.match(/(funny|hilarious|tremendous)/i))
 					{
-						log("comment.comment")
+						log(`comment ${comment.comment}`)
 						return "follow"
 					}
 				}

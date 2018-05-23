@@ -2,14 +2,15 @@
 	"compilerOptions":
 	{
 		"module": "commonjs",
-		"target":"es6", /* async */
+		"target": "es6",
 		"noImplicitAny": false,
-		"sourceMap": true,
-		"outDir":"js/",
-		"removeComments":true
+		"inlineSourceMap": true,
+		"outDir": "js/",
+		"removeComments": true,
+		"allowSyntheticDefaultImports": true
 	},
-	"exclude":
-	[
-		"js/","node_modules"
+	"exclude": [
+		"js/",
+		"node_modules"
 	]
 }

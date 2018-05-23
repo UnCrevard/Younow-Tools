@@ -1,6 +1,6 @@
 import * as fs from "fs"
 import {spawn,ChildProcess} from "child_process"
-import {log,info,error} from "./module_utils"
+import {log,info,error} from "./module_log"
 
 /**
  * [VideoWriter description]

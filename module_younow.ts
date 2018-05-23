@@ -1,39 +1,38 @@
+import { settings } from "./main"
+
 import * as _fs from "fs"
 import * as _path from "path"
 import * as _url from "url"
 import * as _async from "async"
 import * as _progress from "progress"
-import {execFile} from "child_process"
-import {settings} from "./main"
-import {getURL, log, info, error, debug,formatDateTime,prettify} from "./module_utils"
-import {isUsernameInDB,convertToUserDB} from "./module_db"
-import * as dos from "./module_promises"
-import {VideoWriter} from "./module_ffmpeg"
-import {downloadSegments} from "./module_hls"
+import { execFile, spawn } from "child_process"
+import { log, info, error, debug, prettify } from "./Modules/module_log"
+import { FakeDB } from "./Modules/module_db"
+import * as dos from "./Modules/module_promixified"
+import { downloadSegments } from "./module_hls_younow"
+import { formatDate, formatTime, formatDateTime } from "./modules/module_utils"
+import { getURL } from "./modules/module_www"
+
 
 // CDN=400 API=200 https://cdn.younow.com/php/api/broadcast/info/user=XXX
 
-const API_URL="https://api.younow.com"
+const API_URL = "https://api.younow.com"
 
-export function extractUser(user): string
-{
+export function extractUser(user): string {
 	/** @todo filtering illegal/HTML chars */
 
 	// string : 0-9 a-z . - _
 
-	if (isNaN(user))
-	{
+	if (isNaN(user)) {
 		var pos = user.lastIndexOf("/")
 		return (pos < 0) ? user : user.substring(pos + 1)
 	}
-	else
-	{
+	else {
 		return user
 	}
 }
 
-export function errortoString(result:{errorCode:number,errorMsg?:string})
-{
+export function errortoString(result: { errorCode: number, errorMsg?: string }) {
 	return `${result.errorCode} ${result.errorMsg}`
 }
 
@@ -50,50 +49,39 @@ export function errortoString(result:{errorCode:number,errorMsg?:string})
  * @return Promise<Younow.UserInfo|DBUser>
  *
  */
-export function resolveUser(db:DB,user:string|number):Promise<Younow.UserInfo|DBUser>
-{
-	let userdb=isUsernameInDB(db,user)
+export function resolveUser(db: DB, user: string | number): Promise<Younow.UserInfo | DBUser> {
+	let userdb = isUsernameInDB(db, user)
 
-	if (userdb)
-	{
-		userdb.errorCode=0
+	if (userdb) {
+		userdb.errorCode = 0
 		return Promise.resolve(userdb)
 	}
-	else
-	{
-		if (isNaN(user as any))
-		{
+	else {
+		if (isNaN(user as any)) {
 			return getLiveBroadcastByUsername(user)
-				.then(infos=>
-				{
-					if (infos.errorCode == 0 || infos.errorCode == 206)
-					{
+				.then(infos => {
+					if (infos.errorCode == 0 || infos.errorCode == 206) {
 						return getUserInfoByUID(infos.userId)
-						.then(infos=>infos)
+							.then(infos => infos)
 					}
-					else
-					{
+					else {
 						return infos as any
 					}
 				})
 		}
-		else
-		{
+		else {
 			return getUserInfoByUID(user)
-			.then(infos=>
-			{
-				if (infos.userId)
-				{
-					return infos
-				}
-				else
-				{
-					/** non existing uid */
-					infos.errorCode=101
-					infos.errorMsg="Invalid user Id"
-					return infos
-				}
-			})
+				.then(infos => {
+					if (infos.userId) {
+						return infos
+					}
+					else {
+						/** non existing uid */
+						infos.errorCode = 101
+						infos.errorMsg = "Invalid user Id"
+						return infos
+					}
+				})
 		}
 	}
 }
@@ -103,19 +91,16 @@ export function resolveUser(db:DB,user:string|number):Promise<Younow.UserInfo|DB
  * @function async
  *
  */
-export function getUserInfoByUID(uid):Promise<Younow.UserInfo>
-{
+export function getUserInfoByUID(uid): Promise<Younow.UserInfo> {
 	// /includeUserKeyWords=1
 	return getURL(`${API_URL}/php/api/channel/getInfo/channelId=${uid}`)
 }
 
-export function getLiveBroadcastByUsername(username):Promise<Younow.LiveBroadcast>
-{
+export function getLiveBroadcastByUsername(username): Promise<Younow.LiveBroadcast> {
 	return getURL(`${API_URL}/php/api/broadcast/info/user=${username}`)
 }
 
-export function getLiveBroadcastByUID(uid):Promise<Younow.LiveBroadcast>
-{
+export function getLiveBroadcastByUID(uid): Promise<Younow.LiveBroadcast> {
 	return getURL(`${API_URL}/php/api/broadcast/info/channelId=${uid}`)
 }
 
@@ -132,31 +117,27 @@ export function getArchivedBroadcasts(uid):Promise<any>
 }
 */
 
-export function getArchivedBroadcast(bid):Promise<Younow.ArchivedBroadcast>
-{
+export function getArchivedBroadcast(bid): Promise<Younow.ArchivedBroadcast> {
 	// errorCode:246/Broadcast is still live
 
 	return getURL(`${API_URL}/php/api/broadcast/videoPath/broadcastId=${bid}`)
 }
 
-export function getMoments(uid,next):Promise<Younow.Moments>
-{
+export function getMoments(uid, next): Promise<Younow.Moments> {
 	return getURL(`${API_URL}/php/api/moment/profile/channelId=${uid}/createdBefore=${next}`)
 }
 
 // https://api.younow.com/php/api/younow/topBroadcasters/numberOfRecords=20/startFrom=0/tag=${tag}
 // https://cdn.younow.com/php/api/younow/dashboard/locale={ww|en}/trending=50
 
-export function getTrendings():Promise<Younow.Trendings>
-{
+export function getTrendings(): Promise<Younow.Trendings> {
 	// cdn2
 	return getURL(`${API_URL}/php/api/younow/dashboard/locale=${settings.locale}/trending=50`)
 }
 
-export function getTagInfo(tag):Promise<Younow.TagInfo>
-{
+export function getTagInfo(tag): Promise<Younow.TagInfo> {
 
-	return getURL(`https://playdata.younow.com/live/tags/${new Buffer(tag).toString("base64")}.json`)
+	return getURL(`https://playdata.younow.com/live/tags/${Buffer.from(tag).toString("base64")}.json`)
 }
 
 /**
@@ -164,98 +145,87 @@ export function getTagInfo(tag):Promise<Younow.TagInfo>
  * @function downloadArchive - download archived broadcast
  * @return Promise<boolean>
  */
-export async function downloadArchive(user:Younow.UserInfo|DBUser,bid:number,started:number|null):Promise<boolean>
-{
-	info("downloadArchive",user.profile,bid)
+export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: number, started: number | null): Promise<boolean> {
+	info("downloadArchive", user.profile, bid)
 
-	if (settings.noDownload)
-	{
+	if (settings.noDownload) {
 		return true
 	}
 
-	let archive=await getArchivedBroadcast(bid)
+	let archive = await getArchivedBroadcast(bid)
 
-	if (archive.errorCode)
-	{
+	if (archive.errorCode) {
 		error(`${user.profile} ${bid} ${archive.errorCode} ${archive.errorMsg}`)
 		return false
 	}
 
-	let fix:Younow.LiveBroadcast=archive as any
+	let fix: Younow.LiveBroadcast = archive as any
 
-	fix.dateStarted=started||(new Date(archive.broadcastTitle).getTime()/1000)
-	fix.profile=user.profile
-	fix.broadcastId=bid
-	fix.country=user.country
-	fix.awsUrl=archive.broadcastThumbnail
+	fix.dateStarted = started || (new Date(archive.broadcastTitle).getTime() / 1000)
+	fix.profile = user.profile
+	fix.broadcastId = bid
+	fix.country = user.country
+	fix.awsUrl = archive.broadcastThumbnail
 
-	let video_filename=createFilename(archive as any)+"."+settings.videoFormat
+	let video_filename = createFilename(archive as any) + "." + settings.videoFormat
 
 	saveJSON(archive as any).catch(error)
 	downloadThumbnail(archive as any).catch(error)
 
-	let exists=await dos.exists(video_filename)
+	let exists = await dos.exists(video_filename)
 
-	if (!exists)
-	{
-		return getURL(archive.hls,"utf8")
-		.then((playlist:string)=>
-		{
-			let m=playlist.match(/\d+\.ts/g)
+	if (!exists) {
+		//@ts-ignore
+		return getURL(archive.hls, "utf8")
+			.then((playlist: string) => {
+				let m = playlist.match(/\d+\.ts/g)
 
-			if (!m)
-			{
-				error(playlist)
-				return false
-			}
+				if (!m) {
+					error(playlist)
+					return false
+				}
 
-			let total_segment=m.length
+				let total_segment = m.length
 
-			m=archive.hls.match(/(https:.+)playlist.m3u8/i)
+				m = archive.hls.match(/(https:.+)playlist.m3u8/i)
 
-			if (!m)
-			{
-				error(archive.hls)
-				return false
-			}
+				if (!m) {
+					error(archive.hls)
+					return false
+				}
 
-			let url=m[1]
+				let url = m[1]
 
-			let bar=new _progress(`${user.profile} ${bid} :bar :percent :elapseds/:etas :rate/bps`,
-			{
-				total:total_segment,
-				width:20,
-				complete:"●",
-				incomplete:"○",
-				clear:true
+				let bar = new _progress(`${user.profile} ${bid} :bar :percent :elapseds/:etas :rate/bps`,
+					{
+						total: total_segment,
+						width: 20,
+						complete: "●",
+						incomplete: "○",
+						clear: true
+					})
+
+				return downloadSegments(settings, url, video_filename, total_segment, bar, false)
+					.then(err => {
+						return moveFile(video_filename)
+					})
 			})
-
-			return downloadSegments(url,video_filename,total_segment,bar,false)
-			.then(err=>
-			{
-				return moveFile(video_filename)
-			})
-		})
-		.catch(error)
+			.catch(error)
 	}
 }
 
-export function getPlaylist(bid):Promise<string>
-{
-	return getURL(`${API_URL}/php/api/broadcast/videoPath/hls=1/broadcastId=${bid}`,"utf8")
+export function getPlaylist(bid): Promise<string> {
+	return getURL(`${API_URL}/php/api/broadcast/videoPath/hls=1/broadcastId=${bid}`, "utf8")
 }
 
 /** returns Promise<[json:boolean,image:boolean,video:boolean]> */
 
-export async function downloadThemAll(live:Younow.LiveBroadcast)
-{
-	if (settings.noDownload)
-	{
-		return [true,true,true]
+export async function downloadThemAll(live: Younow.LiveBroadcast) {
+	if (settings.noDownload) {
+		return [true, true, true]
 	}
-	else
-	{
-		return Promise.all([saveJSON(live),downloadThumbnail(live),downloadLiveStream(live)])
+	else {
+		return Promise.all([saveJSON(live), downloadThumbnail(live), downloadLiveStream(live)])
 	}
 }
 
@@ -264,149 +234,178 @@ export async function downloadThemAll(live:Younow.LiveBroadcast)
  * downloadLiveStream- download live broadcast
  * returns Promise<whatever>
  */
-export async function downloadLiveStream(live:Younow.LiveBroadcast):Promise<any>
-{
-	if (live.errorCode==0)
-	{
-		let filename=createFilename(live)+"."+settings.videoFormat
 
-		let exists=await dos.exists(filename)
+/*
+export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
+   if (live.errorCode == 0) {
+	   let filename = createFilename(live) + "." + settings.videoFormat
 
-		if (!exists)
-		{
-			return getPlaylist(live.broadcastId)
-			.then((playlist:string)=>
-			{
-				let m=playlist.match(/https:.+\d+.ts/gi)
+	   let exists = await dos.exists(filename)
 
-				if (m)
-				{
-					info(`M3U8 ${m.length} ${m[1]}`)
+	   if (!exists) {
+		   return getPlaylist(live.broadcastId)
+			   .then((playlist: string) => {
+				   let m = playlist.match(/https:.+\d+.ts/gi)
 
-					m=m.pop().match(/(https:.+\/)(\d+).ts/i)
+				   if (m) {
+					   debug(`M3U8 ${m.length} ${m[1]}`)
 
-					if (m)
-					{
-						let url=m[1]
-						let current_segment=Number(m[2])
+					   m = m.pop().match(/(https:.+\/)(\d+).ts/i)
 
-						log(`REWIND ${filename}`)
+					   if (m) {
+						   let url = m[1]
+						   let current_segment = Number(m[2])
 
-						return downloadSegments(url,filename,current_segment,null,true)
-						.then((stream:VideoWriter)=>
-						{
-							if (!stream)
-							{
-								return false
-							}
+						   info(`REWIND ${live.user.profileUrlString}`)
 
-							return new Promise((resolve,reject)=>
-							{
-								let interval=0
-								let fail=0
-								let step=250
-								let slow_down=0.01
+						   return downloadSegments(settings, url, filename, current_segment, null, true)
+							   .then((stream: VideoWriter) => {
+								   if (!stream) {
+									   debug(`STREAM null ${live.user.profileUrlString} ${stream}`)
+									   return false
+								   }
 
-								_async.forever(next=>
-								{
-									getURL(`${url}${current_segment}.ts`,null)
-									.then(buffer=>
-									{
-										fail=0
+								   return new Promise((resolve, reject) => {
+									   info(`STREAM ${live.user.profileUrlString}`)
 
-										interval=interval-interval*slow_down
+									   let interval = 0
+									   let fail = 0
+									   let step = 250
+									   let slow_down = 0.01
 
-										current_segment++
+									   _async.forever(next => {
+										   getURL(`${url}${current_segment}.ts`, null)
+											   .then(buffer => {
+												   fail = 0
 
-										stream.write(buffer,err=>
-										{
-											setTimeout(next,interval)
-										})
-									},err=>
-									{
-										// 403
+												   interval = interval - interval * slow_down
 
-										fail++
+												   current_segment++
 
-										if (fail<10 && err==403)
-										{
-											interval+=step
-											setTimeout(next,interval)
-										}
-										else
-										{
-											next(true)
-										}
-									})
-								},err=>
-								{
-									stream.close(err=>
-									{
-										resolve(true)
-									})
-								})
-							})
-						})
-						.then(err=>
-						{
-							return new Promise(resolve=>
-							{
-								setTimeout(()=>
-								{
-									resolve(moveFile(filename))
-								},10000)
-							})
-						})
+												   stream.write(buffer, err => {
+													   setTimeout(next, interval)
+												   })
+											   }, err => {
+
+												   fail++
+
+												   if (fail < 10 && err == 403) {
+													   interval += step
+
+													   debug(`STREAM ERROR ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
+
+													   setTimeout(next, interval)
+												   }
+												   else {
+													   debug(`STREAM ABORT ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
+													   next(true)
+												   }
+											   })
+									   }, err => {
+										   stream.close(err => {
+											   resolve(true) // @WTF
+										   })
+									   })
+								   })
+							   }, err => err)
+							   .then(err => {
+								   debug(`STREAM MOVE ${live.user.profileUrlString} Err:${err}`)
+
+								   return new Promise(resolve => {
+									   setTimeout(() => {
+										   resolve(moveFile(filename))
+									   }, 10000)
+								   })
+							   })
+					   }
+					   else {
+						   error(playlist)
+						   return false
+					   }
+				   }
+				   else {
+					   error(playlist)
+					   return false
+				   }
+			   })
+	   }
+   }
+}
+*/
+
+export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
+
+	//20180523 : using rtmp stream instead of HLS after younow change.
+
+	if (live.errorCode == 0) {
+
+		return new Promise(async (resolve, reject) => {
+			let filename = createFilename(live) + "." + settings.videoFormat
+
+			let exists = await dos.exists(filename)
+
+			if (!exists) {
+				let params = `-i rtmp://${live.media.host}${live.media.app}/${live.media.stream} ${settings.useFFMPEG} ${filename}`.split(" ")
+
+				let ffmpeg = spawn("ffmpeg", params)
+
+				ffmpeg.on("error", err => {
+					reject(err)
+				})
+
+				ffmpeg.on("exit", code => {
+					if (code) {
+						error(`FFMPEG exit ${code}`)
 					}
-					else
-					{
-						error(playlist)
-						return false
-					}
-				}
-				else
-				{
-					error(playlist)
-					return false
-				}
-			})
-		}
+					resolve("ok")
+				})
+
+				ffmpeg.on("close", code => {
+					resolve("ok")
+				})
+
+				ffmpeg.stderr.on("data", data => {
+					//log(data.toString())
+				})
+
+				ffmpeg.stdin.on("error", err => err)
+			}
+		});
+
+	}
+	else {
+		return Promise.reject(live.errorMsg)
 	}
 }
 
-export async function downloadThumbnail(live:Younow.LiveBroadcast):Promise<boolean>
-{
-	if (live.errorCode==0)
-	{
-		let filename=createFilename(live)+".jpg"
 
-		let exists=await dos.exists(filename)
+export async function downloadThumbnail(live: Younow.LiveBroadcast): Promise<boolean> {
+	if (live.errorCode == 0) {
+		let filename = createFilename(live) + ".jpg"
 
-		if (!exists)
-		{
-			let image:Buffer=await getURL(live.awsUrl,null)
-			await dos.writeFile(filename,image)
+		let exists = await dos.exists(filename)
+
+		if (!exists) {
+			let image: Buffer = await getURL(live.awsUrl, null)
+			await dos.writeFile(filename, image)
 			await moveFile(filename)
-			info("downloadThumbnail",image.length,filename)
+			info("downloadThumbnail", image.length, filename)
 		}
 		return true
 	}
 	return false
 }
 
-export async function saveJSON(live:Younow.LiveBroadcast):Promise<boolean>
-{
-	if (live.errorCode==0)
-	{
-		let filename=createFilename(live)+".json"
+export async function saveJSON(live: Younow.LiveBroadcast): Promise<boolean> {
+	if (live.errorCode == 0) {
+		let filename = createFilename(live) + ".json"
 
-		let exists=await dos.exists(filename)
+		let exists = await dos.exists(filename)
 
-		if (!exists)
-		{
-			await dos.writeFile(filename,prettify(live))
+		if (!exists) {
+			await dos.writeFile(filename, prettify(live))
 			await moveFile(filename)
-			info("saveJSON",filename)
+			info("saveJSON", filename)
 		}
 		return true
 	}
@@ -417,28 +416,109 @@ export async function saveJSON(live:Younow.LiveBroadcast):Promise<boolean>
 * returns std filename
 *
 */
-export function createFilename(live:Younow.LiveBroadcast)
-{
-	let filename=_path.join(settings.pathDownload,`${live.country||"XX"}_${live.profile}_${formatDateTime(new Date((live.dateStarted||live.dateCreated||Date.now()/1000)*1000))}_${live.broadcastId}`)
+export function createFilename(live: Younow.LiveBroadcast) {
+	let filename = _path.join(settings.pathDownload, `${live.country || "XX"}_${live.profile}_${formatDateTime(new Date((live.dateStarted || live.dateCreated || Date.now() / 1000) * 1000))}_${live.broadcastId}`)
 
-	debug("createFilename",filename)
+	debug("createFilename", filename)
 
 	return filename
 }
 
-async function moveFile(filename:string)
-{
-	if (settings.pathMove)
-	{
-		let newpath=_path.join(settings.pathMove,_path.parse(filename).base)
+async function moveFile(filename: string) {
+	if (settings.pathMove) {
+		let newpath = _path.join(settings.pathMove, _path.parse(filename).base)
 
-		info("moveFile",filename,newpath)
-		return dos.rename(filename,newpath)
+		info("moveFile", filename, newpath)
+		return dos.rename(filename, newpath)
 	}
 }
 
-export function getFollowed(userId:number,start:number)
-{
+export function getFollowed(userId: number, start: number) {
 	return getURL(`https://cdn.younow.com/php/api/channel/getFansOf/channelId=${userId}/startFrom=${start}/numberOfRecords=50`)
 }
 
+/** Normalize user info
+ *
+ * @param {Younow.UserInfo}
+ * @return {DBUser}
+ *
+ */
+export function convertToUserDB(uid: number, user: Younow.UserInfo): DBUser {
+	let dbuser: DBUser =
+		{
+			ignore: (user as any).ignore || false,
+			comment: (user as any).comment || "---",
+
+			profile: user.profile,
+			userId: user.userId || uid,
+
+			firstName: user.firstName,
+			lastName: user.lastName,
+
+			country: user.country || "XX",
+			state: user.state,
+			city: user.city,
+
+			description: user.description,
+
+			twitterId: user.twitterId,
+			twitterHandle: user.twitterHandle,
+			youTubeUserName: user.youTubeUserName,
+			youTubeChannelId: user.youTubeChannelId,
+			youTubeTitle: user.youTubeTitle,
+			googleId: user.googleId,
+			googleHandle: user.googleHandle,
+			facebookId: user.facebookId,
+			instagramId: user.instagramId,
+			instagramHandle: user.instagramHandle,
+			facebookPageId: user.facebookId,
+			websiteUrl: user.websiteUrl,
+
+			dateCreated: user.dateCreated,
+			locale: user.locale,
+			language: user.language,
+			tumblrId: user.tumblrId
+		}
+
+	for (let i in dbuser) {
+		if (dbuser[i] === "" || dbuser[i] === null || dbuser[i] === undefined) {
+			delete dbuser[i]
+		}
+	}
+
+	return dbuser
+}
+
+export function openDB() {
+	return new FakeDB().open(settings.pathDB, "Broadcasters")
+}
+
+/** Search profile in the db
+ *
+ * @param {string|number}  profile/profileUrlString or userId
+ * @return {DBUser|null}
+ */
+export function isUsernameInDB(db: DB, user: string | number): DBUser | null {
+	if (isNaN(user as any)) {
+		var regex = new RegExp("^" + user + "$", "i")
+
+		/** @todo */
+
+		for (let i of Object.keys(db)) {
+			let dbuser = db[i]
+
+			let profile = dbuser.profile
+
+			if (profile) {
+				if (profile.match(regex)) {
+					return dbuser
+				}
+			}
+		}
+
+		return null
+	}
+	else {
+		return db[user] || null
+	}
+}

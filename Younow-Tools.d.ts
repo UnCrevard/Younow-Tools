@@ -83,7 +83,7 @@ declare namespace Younow
 		alias: string,
 		enableMoments: number,		// 1 = yes
 
-		isPartner: boolean,
+
 		subscriptionMainUserId: number,
 		isEp: boolean,
 		epTag: string,
@@ -147,6 +147,8 @@ declare namespace Younow
 		errorCode: number
 		errorMsg?:string
 
+		broadcastId: number
+
 		dateCreated: number
 		dateStarted?: number // sometime missing
 		length: number
@@ -166,13 +168,14 @@ declare namespace Younow
 		fans: number
 		//dynamicPricedGoodies:{}
 		locale: string	//'en'
+		country: string		// 'XX'
+
 		media:
 		{
 			host: string	// 'pullstream.younow.8686c.com/',
 			app: string		// 'live',
 			stream: string	// 'Stream-${bid}'
 		}
-		country: string		// 'XX'
 
 		hlsSegmentSize: number	//'2'
 
@@ -220,15 +223,17 @@ declare namespace Younow
 			youTubeChannelId: string | null	// 'UCxxxxxx',
 			youTubeTitle: string
 			//isSubscribable: 0,
-			//subscriptionMainUserId: 0,
-			//subscriptionName: '',
+			//subscriptionMainUserId: 0
+			//subscriptionName: ''
 			//tribeName: null
+			isPartner: boolean
+			partner:number
 		}
 		points: number
 		location?:
 		{
-			city: string				// ''
-			state: string				// ''
+			city: string		// ''
+			state: string		// ''
 			country: string		// 'GB'
 		}
 		//disabledGoodies: []
@@ -246,8 +251,10 @@ declare namespace Younow
 		profile: string
 		lastSegmentId: number	// HLS
 		likes: number
+
 		partner: number			// '0'
-		broadcastId: number
+		isPartner:boolean
+
 		tags: Array<string>
 		tagPlayData: string // 'https://playdata.younow.com/live/tags/xxxxx==.json',
 		disableSelfie: number	// '0'
@@ -459,6 +466,7 @@ interface Settings
 
 	/** download/temp folder {string|null} */
 	pathDownload:string
+	generateDownloadFolderDate:boolean
 	noDownload:boolean
 	parallelDownloads:number
 	pathConfig:string
@@ -468,6 +476,7 @@ interface Settings
 	args:string[]
 	locale:string
 	timeout:number
+	debug_file:string
 }
 
 interface LiveUser

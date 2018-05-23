@@ -1,68 +1,56 @@
-import {settings} from "./main"
+import { settings } from "./main"
 
-import {log,info,debug,error,getURL,prettify} from "./module_utils"
-import {openDB,isUsernameInDB} from "./module_db"
+import { log, info, debug, error, prettify } from "./modules/module_log"
 import * as younow from "./module_younow"
 import * as _async from "async"
 
-export function cmdSearch(patterns:string[])
-{
-	openDB()
-	.then(db=>
-	{
-		_async.eachSeries(patterns,
-		function(user,callback)
-		{
-			user=younow.extractUser(user)
+export function cmdSearch(patterns: string[]) {
+	younow.openDB()
+		.then(db => {
+			_async.eachSeries(patterns,
+				function(user, callback) {
+					user = younow.extractUser(user)
 
-			let regex=new RegExp(user,"i")
+					let regex = new RegExp(user, "i")
 
-			/** @todo */
+					/** @todo */
 
-			Object.keys(db).forEach(key=>
-			{
-				let dbuser:DBUser=db[key]
+					Object.keys(db).forEach(key => {
+						let dbuser: DBUser = db[key]
 
-				if (dbuser.userId)
-				{
-					if (JSON.stringify(dbuser).match(regex))
-					{
-						let profile=dbuser.profile||"?"
+						if (dbuser.userId) {
+							if (JSON.stringify(dbuser).match(regex)) {
+								let profile = dbuser.profile || "?"
 
-						log(`${profile} (from db)`)
-						log(prettify(dbuser))
-					}
-				}
-			})
+								log(`${profile} (from db)`)
+								log(prettify(dbuser))
+							}
+						}
+					})
 
-			callback()
-		})
-	})
-	.catch(error)
-}
-
-export function cmdResolve(users:string[])
-{
-	openDB()
-	.then(db=>
-	{
-		_async.eachSeries(users,
-		function(user,callback)
-		{
-			user=younow.extractUser(user)
-			younow.resolveUser(db,user)
-			.then(infos=>
-				{
-					log(`${user} (online result)`)
-					log(prettify(infos))
 					callback()
 				})
-			.catch(err=>
-			{
-				error(err)
-				callback()
-			})
 		})
-	})
-	.catch(error)
+		.catch(error)
+}
+
+export function cmdResolve(users: string[]) {
+	younow.openDB()
+		.then(db => {
+			_async.eachSeries(users,
+				function(user, callback) {
+					user = younow.extractUser(user)
+					younow.resolveUser(db, user)
+						.then(infos => {
+							log(`${user} (online result)`)
+							log(prettify(infos))
+							callback()
+						})
+						.catch(err => {
+							error(err)
+							callback()
+						})
+				})
+		})
+		.catch(error)
 }

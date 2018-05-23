@@ -172,7 +172,7 @@ async function main(args) {
 	settings.pathMove = commander["mv"] || null
 	settings.parallelDownloads = commander["limit"] || 5
 	settings.videoFormat = commander["fmt"]
-	settings.useFFMPEG = commander["ffmpeg"]
+	settings.useFFMPEG = settings.FFMPEG_DEFAULT
 	settings.locale = commander["locale"].toLowerCase()
 	settings.timeout = commander["timer"]
 

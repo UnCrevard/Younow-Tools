@@ -1,10 +1,5 @@
-import * as _fs from "fs"
-import * as _path from "path"
-import * as _child from "child_process"
-import * as commander from "commander"
-import * as _async from "async"
 
-let pkg = require("../package.json")
+global.verbosity = 0
 
 try {
 	// add source map support for typescript if available
@@ -14,6 +9,8 @@ try {
 catch (e) {
 
 }
+
+const pkg: Package = require("../package.json")
 
 export let settings: Settings =
 	{
@@ -31,11 +28,17 @@ export let settings: Settings =
 		args: null,
 		locale: null,
 		timeout: null,
-		debug_file: null
+		debug_file: null,
+		production: ("_from" in pkg)
 	}
 
+import * as _fs from "fs"
+import * as _path from "path"
+import * as _child from "child_process"
+import * as commander from "commander"
+import * as _async from "async"
 import * as _younow from "./module_younow"
-import { log, info, debug, dump, error, prettify, setVerbose } from "./modules/module_log"
+import { log, info, debug, dump, error, prettify } from "./modules/module_log"
 import { FakeDB } from "./modules/module_db"
 import { cmdAdd } from "./cmd_add"
 import { cmdAnnotation } from "./cmd_annotation"
@@ -48,6 +51,9 @@ import { cmdVCR } from "./cmd_vcr"
 import { cmdLive } from "./cmd_live"
 import { cmdBroadcast } from "./cmd_broadcast"
 import * as dos from "./modules/module_promixified"
+import { Time } from "./modules/module_utils"
+
+import { checkUpdate } from "./module_update"
 
 const enum CommandID {
 	add,
@@ -162,7 +168,9 @@ async function main(args) {
 	commander.parse(args)
 	let params: any = commander.args[0] // string|string[]
 
-	setVerbose(commander["verbose"] || 0)
+	//setVerbose(commander["verbose"] || 0)
+
+	global.verbosity = commander["verbose"] || 0
 
 	settings.pathConfig = commander["config"]
 	// settings.debug_file=_path.join(settings.pathConfig,`debug_${formatDateTime(new Date())}.log`)
@@ -210,6 +218,28 @@ async function main(args) {
 	}
 
 	info(prettify(settings))
+
+	if (settings.production) {
+		setTimeout(30 * Time.SECOND, checkUpdate)
+	}
+	else {
+		error("dev mode detected")
+	}
+
+	/*
+
+		check for ffmpeg
+
+	*/
+
+	let isFFMPEG = _child.spawn("ffmpeg", ["-version"])
+
+	isFFMPEG.on("error", err => {
+		error(`ffmpeg is missing !!! You MUST install it before using Younow-Tools.`)
+		error(`On windows go to https://ffmpeg.zeranoe.com/builds/ and install it and make it available in path`)
+		error(err)
+		process.exit(-1)
+	})
 
 	switch (commandId) {
 		case CommandID.scan:
@@ -306,7 +336,8 @@ async function main(args) {
 	Report any bug or missing feature at your will.
 
 	If you like this software, please consider a Ƀitcoin donation to 14bpqrNgreKaFtLaK85ArtcUKyAxuKpwJM`)
-			commander.help()
+
+			commander.outputHelp(str => str)
 	}
 }
 

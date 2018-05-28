@@ -79,18 +79,18 @@ function update_scan(db: DB, streams: Array<any>) {
 										check: 0
 									}
 							}
-
-							if (user.userId in streams) {
-								if (streams[user.userId].indexOf(user.broadcastId) < 0) {
-									let items = streams[user.userId]
-									items.push(user.broadcastId)
-									streams[user.userId] = items
+							if (settings.production == false) {
+								if (user.userId in streams) {
+									if (streams[user.userId].indexOf(user.broadcastId) < 0) {
+										let items = streams[user.userId]
+										items.push(user.broadcastId)
+										streams[user.userId] = items
+									}
+								}
+								else {
+									streams[user.userId] = [user.broadcastId]
 								}
 							}
-							else {
-								streams[user.userId] = [user.broadcastId]
-							}
-
 							let dbuser = db[user.userId]
 
 							if (dbuser) {
@@ -210,8 +210,8 @@ function update_scan(db: DB, streams: Array<any>) {
 											.then(([thumb, video, json]) => {
 												log(`${user.profile} is over json : ${thumb} image : ${video} video :${json}`)
 											}, err => {
-													error(err)
-												})
+												error(err)
+											})
 									}
 								})
 								.catch(error)

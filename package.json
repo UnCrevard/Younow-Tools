@@ -34,5 +34,12 @@
   },
   "engines": {
     "node": ">=6.10.2"
+  },
+  "changelog":
+  {
+    "1.0.30":[
+      "+ffmpeg check installation",
+      "+check for update",
+      "+fix API compatibilty"]
   }
 }

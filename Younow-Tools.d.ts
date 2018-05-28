@@ -4,12 +4,10 @@
  *
 */
 
-declare function isNaN(number: number|string): boolean;
+declare function isNaN(number: number | string): boolean;
 
-declare namespace Younow
-{
-	interface UserInfo
-	{
+declare namespace Younow {
+	interface UserInfo {
 		errorCode: number
 		errorMsg: string
 
@@ -92,8 +90,7 @@ declare namespace Younow
 
 	/* Archive getBroadcastInfo() */
 
-	interface ArchivedBroadcast
-	{
+	interface ArchivedBroadcast {
 		errorCode: number
 		errorMsg: string
 
@@ -129,8 +126,7 @@ declare namespace Younow
 
 	/* LIVE getUserBroadcastInfoByXXX() */
 
-	interface Comment
-	{
+	interface Comment {
 		comment: string
 		userId: string
 		profileUrlString: string
@@ -142,10 +138,9 @@ declare namespace Younow
 		subscriptionType: number	// 0
 	}
 
-	interface LiveBroadcast
-	{
+	interface LiveBroadcast {
 		errorCode: number
-		errorMsg?:string
+		errorMsg?: string
 
 		broadcastId: number
 
@@ -227,7 +222,7 @@ declare namespace Younow
 			//subscriptionName: ''
 			//tribeName: null
 			isPartner: boolean
-			partner:number
+			partner: number
 		}
 		points: number
 		location?:
@@ -253,7 +248,7 @@ declare namespace Younow
 		likes: number
 
 		partner: number			// '0'
-		isPartner:boolean
+		isPartner: boolean
 
 		tags: Array<string>
 		tagPlayData: string // 'https://playdata.younow.com/live/tags/xxxxx==.json',
@@ -275,17 +270,15 @@ declare namespace Younow
 		enableMoments: number	// 1
 	}
 
-	interface Tag
-	{
-		tag:string
-		score:number
+	interface Tag {
+		tag: string
+		score: number
 	}
 
-	interface Trendings
-	{
+	interface Trendings {
 		errorCode: number
 		errorMsg: string
-		trending_tags:Array<Tag>
+		trending_tags: Array<Tag>
 		featured_users: Array<any>
 		trending_users:
 		[
@@ -309,8 +302,7 @@ declare namespace Younow
 		]
 	}
 
-	interface TagInfoUser
-	{
+	interface TagInfoUser {
 		broadcastId: number
 		fans: number		// current broadcast
 		globalSpenderRank: number	// ?
@@ -328,80 +320,73 @@ declare namespace Younow
 		views: number		// current broadcast
 	}
 
-	interface TagInfo
-	{
+	interface TagInfo {
 		errorCode: number
 		errorMsg: string // "success"
 		serverTime: number
 		tag: string
-		items:Array<TagInfoUser>
+		items: Array<TagInfoUser>
 	}
 
-	interface Moments
-	{
-		errorCode:number
-		errorMsg:string
-		serverTime:number
-		hasMore:boolean
-		items:Array<Moment|Collection>
+	interface Moments {
+		errorCode: number
+		errorMsg: string
+		serverTime: number
+		hasMore: boolean
+		items: Array<Moment | Collection>
 	}
 
-	interface Moment
-	{
-		type:string // moment
-		broadcastId:number
-		created:number
+	interface Moment {
+		type: string // moment
+		broadcastId: number
+		created: number
 		broadcaster:
 		{
-			name:string		// username
-			userId:number
-			level:number
+			name: string		// username
+			userId: number
+			level: number
 		}
 
 	}
-	interface Collection
-	{
+	interface Collection {
 
-		type:string			// collection
-		broadcastId:number
-		created:number
+		type: string			// collection
+		broadcastId: number
+		created: number
 		broadcaster:
 		{
-			name:string		// profile?
-			userId:number
-			level:number
+			name: string		// profile?
+			userId: number
+			level: number
 		}
 	}
 
-	interface Followed
-	{
-		errorCode:number
-		errorMsg?:string
+	interface Followed {
+		errorCode: number
+		errorMsg?: string
 		fans:
 		[
 			{
-				userId:number
-				profileUrlString:string
-				firstName:string
-				lastName:string
-				description:string
+				userId: number
+				profileUrlString: string
+				firstName: string
+				lastName: string
+				description: string
 			}
 		],
-		active:null
-		hasNext:number	// 1
-		count:number
+		active: null
+		hasNext: number	// 1
+		count: number
 	}
 
-	const enum FollowedStatus
-	{
-		watching=0,
-		broadcasting=2
+	const enum FollowedStatus {
+		watching = 0,
+		broadcasting = 2
 	}
 
-	interface FollowedOnline
-	{
+	interface FollowedOnline {
 		errorCode: number
-		errorMsg?:string
+		errorMsg?: string
 		nextRefresh: number,
 		users:
 		[
@@ -416,14 +401,13 @@ declare namespace Younow
 				profile: string
 				globalSpenderRank: number
 				viewers: number
-				tags:Array<string>
+				tags: Array<string>
 			}
 		]
 		totalFans?: number
 	}
 
-	interface Followers
-	{
+	interface Followers {
 		errorCode: number
 		fans:
 		[
@@ -440,103 +424,140 @@ declare namespace Younow
 		count: number
 	}
 
-	interface FollowersOnline
-	{
+	interface FollowersOnline {
 
 	}
 }
 
-declare namespace Utils
-{
-	const enum Time
-	{
-		SECOND=1000,
-		MINUTE=60000,
-		HOUR=3600000
+declare namespace Utils {
+	const enum Time {
+		SECOND = 1000,
+		MINUTE = 60000,
+		HOUR = 3600000
 	}
 }
 
-interface Settings
-{
-	version:string
+interface Settings {
+	version: string
 	/** data base path {string|null}*/
-	pathDB:string
+	pathDB: string
 	/** final folder {string|null} */
-	pathMove:string
+	pathMove: string
 
 	/** download/temp folder {string|null} */
-	pathDownload:string
-	generateDownloadFolderDate:boolean
-	noDownload:boolean
-	parallelDownloads:number
-	pathConfig:string
-	readonly FFMPEG_DEFAULT:string
-	useFFMPEG:string
-	videoFormat:string
-	args:string[]
-	locale:string
-	timeout:number
-	debug_file:string
+	pathDownload: string
+	generateDownloadFolderDate: boolean
+	noDownload: boolean
+	parallelDownloads: number
+	pathConfig: string
+	readonly FFMPEG_DEFAULT: string
+	useFFMPEG: string
+	videoFormat: string
+	args: string[]
+	locale: string
+	timeout: number
+	debug_file: string
+	production: boolean
 }
 
-interface LiveUser
-{
-	[index:number]:
+interface LiveUser {
+	[index: number]:
 	{
-		userId:number
-		broadcastId:number
-		isIgnored:boolean
-		isFollowed:boolean
-		infos:Younow.LiveBroadcast
-		check:number
+		userId: number
+		broadcastId: number
+		isIgnored: boolean
+		isFollowed: boolean
+		infos: Younow.LiveBroadcast
+		check: number
 	}
 }
 
-interface DBUser
-{
-		ignore:boolean
-		comment:string
-		errorCode?:number
-		errorMsg?:string
+interface DBUser {
+	ignore: boolean
+	comment: string
+	errorCode?: number
+	errorMsg?: string
 
-		profile: string
-		userId: number
+	profile: string
+	userId: number
 
-		firstName: string
-		lastName: string
+	firstName: string
+	lastName: string
 
-		country: string
-		state: string
-		city: string
+	country: string
+	state: string
+	city: string
 
-		description: string
+	description: string
 
-		twitterId: string,
-		twitterHandle: string
-		youTubeUserName: string
-		youTubeChannelId: string
-		youTubeTitle: string
-		googleId: string
-		googleHandle: string
-		facebookId: string
-		instagramId: string
-		instagramHandle: string
-		facebookPageId: string
-		websiteUrl: string
+	twitterId: string,
+	twitterHandle: string
+	youTubeUserName: string
+	youTubeChannelId: string
+	youTubeTitle: string
+	googleId: string
+	googleHandle: string
+	facebookId: string
+	instagramId: string
+	instagramHandle: string
+	facebookPageId: string
+	websiteUrl: string
 
-		dateCreated: string
-		locale: string
-		language: string
-		tumblrId: string
+	dateCreated: string
+	locale: string
+	language: string
+	tumblrId: string
 }
 
-interface DB
-{
-		[index:number]:DBUser
-		self:any
+interface DB {
+	[index: number]: DBUser
+	self: any
 }
 
-interface Streams
-{
-	[index:number]:Array<number>
+interface Streams {
+	[index: number]: Array<number>
 }
+
+interface Package {
+	"name": "younow-tools",
+	"version": "1.0.29",
+	"description": "younow cli client",
+	"main": "./js/main.js",
+	"bin": {
+		"younow": "./bin/younow"
+	},
+	"scripts": {
+		"test": "younow -v api"
+	},
+	"keywords": [
+		"younow"
+	],
+	"author": "UnCrevard@users.noreply.github.com",
+	"license": "WTFPL",
+	"repository": {
+		"url": "https://github.com/UnCrevard/Younow-Tools",
+		"type": "git"
+	},
+	"dependencies": {
+		"async": "^2.6.0",
+		"commander": "^2.15.1",
+		"progress": "^2.0.0",
+		"request": "^2.86.0"
+	},
+	"devDependencies": {
+		"@types/async": "^2.0.49",
+		"@types/commander": "^2.12.2",
+		"@types/node": "^7.0.64",
+		"@types/progress": "^1.1.28",
+		"@types/request": "0.0.42",
+		"source-map-support": "^0.4.18"
+	},
+	"engines": {
+		"node": ">=6.10.2"
+	},
+	"changelog":
+	{
+		"1.0.29": "so many thing !!!"
+	}
+}
+

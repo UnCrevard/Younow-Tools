@@ -1,7 +1,5 @@
 # Younow-Tools
 
-[![NPM](https://nodei.co/npm/younow-tools.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/younow-tools/)[![NPM](https://nodei.co/npm-dl/younow-tools.png?height=3)](https://nodei.co/npm/younow-tools/)
-
 ## Installation
 
 1st you need to install  [NodeJS](https://nodejs.org/en/download/current/) download and install the LTS or Current.
@@ -18,13 +16,29 @@ To update younow-tools just type :
 
 ### Change log
 
-* 20180523 fix : Using rtmp stream now (HLS has been removed from Younow Website = Flash Only) so FFMPEG is mandatory now. You can get it from https://ffmpeg.zeranoe.com/builds/
+20180528/1.0.30
+
+	check for ffmpeg installation 
+	check for update
+	fix issues with ffmpeg & api changes
+
+20180523/1.0.29
+
+	urgent : Using rtmp stream now (HLS has been removed from Younow Website = Flash Only) so **FFMPEG is mandatory now**. You can get it from https://ffmpeg.zeranoe.com/builds/
 
 	*rewind is unavailable with rtmp*. 
-* 20170504 fix : linux compatibility 
-* 20170506 add : option --locale 
-* 20170507 add : command follow 
-* 20170510 add : command followed & fix follow "soon..." 
+20170504
+
+	fix : linux compatibility 
+20170506
+
+	add : option --locale 
+20170507
+
+	add : command follow 
+20170510
+
+	add : command followed & fix follow "soon..." 
 
 ## Summary
 

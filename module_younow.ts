@@ -12,6 +12,7 @@ import * as dos from "./Modules/module_promixified"
 import { downloadSegments } from "./module_hls_younow"
 import { formatDate, formatTime, formatDateTime } from "./modules/module_utils"
 import { getURL } from "./modules/module_www"
+import { VideoWriter } from "./modules/module_ffmpeg"
 
 
 // CDN=400 API=200 https://cdn.younow.com/php/api/broadcast/info/user=XXX
@@ -145,7 +146,7 @@ export function getTagInfo(tag): Promise<Younow.TagInfo> {
  * @function downloadArchive - download archived broadcast
  * @return Promise<boolean>
  */
-export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: number, started: number | null): Promise<boolean> {
+export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: number, started: number | null): Promise<any> {
 	info("downloadArchive", user.profile, bid)
 
 	if (settings.noDownload) {
@@ -175,8 +176,8 @@ export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: numbe
 	let exists = await dos.exists(video_filename)
 
 	if (!exists) {
-		//@ts-ignore
 		return getURL(archive.hls, "utf8")
+			//@ts-ignore
 			.then((playlist: string) => {
 				let m = playlist.match(/\d+\.ts/g)
 
@@ -207,10 +208,17 @@ export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: numbe
 
 				return downloadSegments(settings, url, video_filename, total_segment, bar, false)
 					.then(err => {
-						return moveFile(video_filename)
+						dos.timeout(10000)
+							.then(err => {
+								return moveFile(video_filename)
+							})
+							.catch(error)
 					})
 			})
 			.catch(error)
+	}
+	else {
+		return false
 	}
 }
 
@@ -237,101 +245,102 @@ export async function downloadThemAll(live: Younow.LiveBroadcast) {
 
 /*
 export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
-   if (live.errorCode == 0) {
-	   let filename = createFilename(live) + "." + settings.videoFormat
+	if (live.errorCode == 0) {
+		let filename = createFilename(live) + "." + settings.videoFormat
 
-	   let exists = await dos.exists(filename)
+		let exists = await dos.exists(filename)
 
-	   if (!exists) {
-		   return getPlaylist(live.broadcastId)
-			   .then((playlist: string) => {
-				   let m = playlist.match(/https:.+\d+.ts/gi)
+		if (!exists) {
+			return getPlaylist(live.broadcastId)
+				.then((playlist: string) => {
+					let m = playlist.match(/https:.+\d+.ts/gi)
 
-				   if (m) {
-					   debug(`M3U8 ${m.length} ${m[1]}`)
+					if (m) {
+						debug(`M3U8 ${m.length} ${m[1]}`)
 
-					   m = m.pop().match(/(https:.+\/)(\d+).ts/i)
+						m = m.pop().match(/(https:.+\/)(\d+).ts/i)
 
-					   if (m) {
-						   let url = m[1]
-						   let current_segment = Number(m[2])
+						if (m) {
+							let url = m[1]
+							let current_segment = Number(m[2])
 
-						   info(`REWIND ${live.user.profileUrlString}`)
+							info(`REWIND ${live.user.profileUrlString}`)
 
-						   return downloadSegments(settings, url, filename, current_segment, null, true)
-							   .then((stream: VideoWriter) => {
-								   if (!stream) {
-									   debug(`STREAM null ${live.user.profileUrlString} ${stream}`)
-									   return false
-								   }
+							return downloadSegments(settings, url, filename, current_segment, null, true)
+								.then((stream: VideoWriter) => {
+									if (!stream) {
+										debug(`STREAM null ${live.user.profileUrlString} ${stream}`)
+										return false
+									}
 
-								   return new Promise((resolve, reject) => {
-									   info(`STREAM ${live.user.profileUrlString}`)
+									return new Promise((resolve, reject) => {
+										info(`STREAM ${live.user.profileUrlString}`)
 
-									   let interval = 0
-									   let fail = 0
-									   let step = 250
-									   let slow_down = 0.01
+										let interval = 0
+										let fail = 0
+										let step = 250
+										let slow_down = 0.01
 
-									   _async.forever(next => {
-										   getURL(`${url}${current_segment}.ts`, null)
-											   .then(buffer => {
-												   fail = 0
+										_async.forever(next => {
+											getURL(`${url}${current_segment}.ts`, null)
+												.then(buffer => {
+													fail = 0
 
-												   interval = interval - interval * slow_down
+													interval = interval - interval * slow_down
 
-												   current_segment++
+													current_segment++
 
-												   stream.write(buffer, err => {
-													   setTimeout(next, interval)
-												   })
-											   }, err => {
+													stream.write(buffer, err => {
+														setTimeout(next, interval)
+													})
+												}, err => {
 
-												   fail++
+													fail++
 
-												   if (fail < 10 && err == 403) {
-													   interval += step
+													if (fail < 10 && err == 403) {
+														interval += step
 
-													   debug(`STREAM ERROR ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
+														debug(`STREAM ERROR ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
 
-													   setTimeout(next, interval)
-												   }
-												   else {
-													   debug(`STREAM ABORT ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
-													   next(true)
-												   }
-											   })
-									   }, err => {
-										   stream.close(err => {
-											   resolve(true) // @WTF
-										   })
-									   })
-								   })
-							   }, err => err)
-							   .then(err => {
-								   debug(`STREAM MOVE ${live.user.profileUrlString} Err:${err}`)
+														setTimeout(next, interval)
+													}
+													else {
+														debug(`STREAM ABORT ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
+														next(true)
+													}
+												})
+										}, err => {
+											stream.close(err => {
+												resolve(true) // @WTF
+											})
+										})
+									})
+								}, err => err)
+								.then(err => {
+									debug(`STREAM MOVE ${live.user.profileUrlString} Err:${err}`)
 
-								   return new Promise(resolve => {
-									   setTimeout(() => {
-										   resolve(moveFile(filename))
-									   }, 10000)
-								   })
-							   })
-					   }
-					   else {
-						   error(playlist)
-						   return false
-					   }
-				   }
-				   else {
-					   error(playlist)
-					   return false
-				   }
-			   })
-	   }
-   }
+									return new Promise(resolve => {
+										setTimeout(() => {
+											resolve(moveFile(filename))
+										}, 10000)
+									})
+								})
+						}
+						else {
+							error(playlist)
+							return false
+						}
+					}
+					else {
+						error(playlist)
+						return false
+					}
+				})
+		}
+	}
 }
 */
+
 
 export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
 
@@ -357,11 +366,17 @@ export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<an
 					if (code) {
 						error(`FFMPEG exit ${code}`)
 					}
-					resolve("ok")
 				})
 
 				ffmpeg.on("close", code => {
-					resolve("ok")
+
+					moveFile(filename).
+						then(err => {
+							resolve("ok")
+						})
+						.catch(err => {
+							reject(err)
+						})
 				})
 
 				ffmpeg.stderr.on("data", data => {
@@ -377,7 +392,6 @@ export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<an
 		return Promise.reject(live.errorMsg)
 	}
 }
-
 
 export async function downloadThumbnail(live: Younow.LiveBroadcast): Promise<boolean> {
 	if (live.errorCode == 0) {

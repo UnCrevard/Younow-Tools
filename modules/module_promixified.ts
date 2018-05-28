@@ -35,15 +35,15 @@ export function appendFile(filename: string, data: string | Buffer) {
 
 /** returns Promise(null or err) */
 
-export function rename(src: string, dst: string) {
+export function rename(src: string, dst: string): Promise<any> {
 	return new Promise((resolve, reject) => {
 		fs.rename(src, dst, err => err ? reject(err) : resolve(err))
 	})
 }
 
-export function moveTo(filename: string, dst: string) {
+export function moveTo(filename: string, dstPath: string) {
 
-	let newpath = path.join(dst, filename)
+	let newpath = path.join(dstPath, filename)
 	return rename(filename, newpath)
 }
 

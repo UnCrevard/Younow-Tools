@@ -5,35 +5,33 @@ enum Verbosity {
 	dump	// red json
 }
 
-export let verbose = 0
-
-export function setVerbose(level: number) {
-	verbose = level
+export function log(...args) {
+	console.log("\u001b[97m" + args.join(" ") + "\u001b[39m")
 }
 
-export const log = console.log
-
 export function info(...args) {
-	if (verbose >= Verbosity.info) {
-		log("\u001b[94m" + args.join(" ") + "\u001b[39m")
+	if (global.verbosity >= Verbosity.info) {
+		console.log("\u001b[94m" + args.join(" ") + "\u001b[39m")
 	}
 }
 
 export function debug(...args) {
-	if (verbose >= Verbosity.debug) {
+	if (global.verbosity >= Verbosity.debug) {
 		log("\u001b[92m" + args.join(" ") + "\u001b[39m")
 	}
 }
 
-export function dump(o) {
-	if (verbose >= Verbosity.dump) {
-		log(o)
-	}
+export function error(...args) {
+	log("\u001b[91m" + args.join(" ") + "\u001b[39m")
+	return args
 }
 
-export const error = console.error
+export function dump(o) {
+	if (global.verbosity >= Verbosity.dump) {
+		console.log("%o", o)
+	}
+}
 
 export function prettify(obj): string {
 	return JSON.stringify(obj, null, "\t").replace(/,|{|}|\"/g, "")
 }
-

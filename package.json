@@ -1,6 +1,6 @@
 {
   "name": "younow-tools",
-  "version": "1.0.29",
+  "version": "1.0.30",
   "description": "younow cli client",
   "main": "./js/main.js",
   "bin": {
@@ -35,11 +35,11 @@
   "engines": {
     "node": ">=6.10.2"
   },
-  "changelog":
-  {
-    "1.0.30":[
+  "changelog": {
+    "1.0.30": [
       "+ffmpeg check installation",
       "+check for update",
-      "+fix API compatibilty"]
+      "+fix API compatibilty"
+    ]
   }
 }

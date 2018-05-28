@@ -1,15 +1,6 @@
 
 global.verbosity = 0
 
-try {
-	// add source map support for typescript if available
-
-	require("source-map-support").install()
-}
-catch (e) {
-
-}
-
 const pkg: Package = require("../package.json")
 
 export let settings: Settings =
@@ -220,7 +211,7 @@ async function main(args) {
 	info(prettify(settings))
 
 	if (settings.production) {
-		setTimeout(30 * Time.SECOND, checkUpdate)
+		setTimeout(checkUpdate, 30 * Time.SECOND)
 	}
 	else {
 		error("dev mode detected")
@@ -337,8 +328,8 @@ async function main(args) {
 
 	If you like this software, please consider a Ƀitcoin donation to 14bpqrNgreKaFtLaK85ArtcUKyAxuKpwJM`)
 
-			commander.outputHelp(str => str)
+			commander.help()
 	}
 }
 
-main(process.argv).catch(error)
+main(process.argv)

@@ -21,6 +21,4 @@ export const checkUpdate = async function() {
 	catch (err) {
 		error("update fail", err)
 	}
-
-	setTimeout(Time.HOUR, checkUpdate)
 }

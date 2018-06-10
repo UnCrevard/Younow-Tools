@@ -1,6 +1,6 @@
 {
   "name": "younow-tools",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "description": "younow cli client",
   "main": "./js/main.js",
   "bin": {
@@ -36,13 +36,15 @@
     "node": ">=6.10.2"
   },
   "changelog": {
-    "1.0.32":
-    ["fix a lowercase problem on linux (thx to torqueyy)",
-    "add bc shortcut for broadcast",
-    "fix API hostname",
-  "😂 Younow forgot to renew their ssl certificate 😂"],
-    "1.0.31":
-    ["fix previous build"],
+    "1.0.32": [
+      "fix a lowercase problem on linux (thx to torqueyy)",
+      "add bc shortcut for broadcast",
+      "fix API hostname",
+      "😂 Younow forgot to renew their ssl certificate 😂"
+    ],
+    "1.0.31": [
+      "fix previous build"
+    ],
     "1.0.30": [
       "+ffmpeg check installation",
       "+check for update",

@@ -19,7 +19,12 @@ export class VideoWriter {
 		this.filename = filename
 
 		if (useFFMPEG) {
-			let params = `-i - ${useFFMPEG} ${filename}`.split(" ")
+
+			//@ugly
+
+			let params = ["-i", "-"].concat(useFFMPEG.split(" "))
+
+			params.push(filename)
 
 			info(`FFMPEG : ${params.join(" ")}`)
 
@@ -41,7 +46,7 @@ export class VideoWriter {
 			})
 
 			this.ffmpeg.stderr.on("data", data => {
-				//error(data.toString())
+				error(data.toString())
 			})
 
 			this.ffmpeg.stdin.on("error", err => err)

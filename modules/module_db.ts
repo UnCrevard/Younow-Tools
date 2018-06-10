@@ -57,7 +57,7 @@ export class FakeDB {
 			{
 				deleteProperty(target, key) {
 					if (key in target) {
-						fs.appendFile(target.self.filename, `-${key}\n`, err => err)
+						fs.appendFile(target.self.filename, `-${key as any}\n`, err => err)
 						return delete target[key]
 					}
 					else {
@@ -65,7 +65,7 @@ export class FakeDB {
 					}
 				},
 				set(target, key, value, recv) {
-					fs.appendFile(target.self.filename, `+${key}:${JSON.stringify(value)}\n`, err => err)
+					fs.appendFile(target.self.filename, `+${key as any}:${JSON.stringify(value)}\n`, err => err)
 					return target[key] = value
 				}
 			})

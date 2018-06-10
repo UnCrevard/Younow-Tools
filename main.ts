@@ -4,24 +4,24 @@ global.verbosity = 0
 const pkg: Package = require("../package.json")
 
 export let settings: Settings =
-	{
-		version: pkg.version,
-		pathDB: null,
-		pathDownload: null,
-		generateDownloadFolderDate: false,
-		noDownload: null,
-		pathMove: null,
-		pathConfig: null,
-		parallelDownloads: null,
-		useFFMPEG: null,
-		FFMPEG_DEFAULT: "-hide_banner -loglevel error -c copy -video_track_timescale 0",
-		videoFormat: null,
-		args: null,
-		locale: null,
-		timeout: null,
-		debug_file: null,
-		production: ("_from" in pkg)
-	}
+{
+	version: pkg.version,
+	pathDB: null,
+	pathDownload: null,
+	generateDownloadFolderDate: false,
+	noDownload: null,
+	pathMove: null,
+	pathConfig: null,
+	parallelDownloads: null,
+	useFFMPEG: null,
+	FFMPEG_DEFAULT: "-hide_banner -loglevel error -c copy -video_track_timescale 0",
+	videoFormat: null,
+	args: null,
+	locale: null,
+	timeout: null,
+	debug_file: null,
+	production: ("_from" in pkg)
+}
 
 import * as _fs from "fs"
 import * as _path from "path"
@@ -131,6 +131,7 @@ async function main(args) {
 
 	commander
 		.command("broadcast <broadcastId...>")
+		.alias("bc")
 		.description("download broadcastId ")
 		.action((users, cmd) => commandId = CommandID.broadcast)
 

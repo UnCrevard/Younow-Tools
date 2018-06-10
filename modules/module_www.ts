@@ -20,13 +20,15 @@ export const jar = Request.jar()
 const config: Request.CoreOptions = {
 	jar: jar,
 	headers:
-		{
-			"user-agent": getFirefoxUserAgent(),
-			"Accept-Language": "en-us, en; q=0.5"
-		},
+	{
+		"user-agent": getFirefoxUserAgent(),
+		"Accept-Language": "en-us, en; q=0.5"
+	},
 	gzip: true,
 	encoding: null
 }
+
+debug(config)
 
 export const req = Request.defaults(config)
 
@@ -46,6 +48,7 @@ export function getURL(url, encoding = "json"): Promise<any> {
 				reject(err)
 			}
 			else if (res.statusCode != 200) {
+				error(`NET ${res.statusCode} ${url}`)
 				reject(res.statusCode)
 			}
 			else {

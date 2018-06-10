@@ -6,9 +6,9 @@ import * as _url from "url"
 import * as _async from "async"
 import * as _progress from "progress"
 import { execFile, spawn } from "child_process"
-import { log, info, error, debug, prettify } from "./Modules/module_log"
-import { FakeDB } from "./Modules/module_db"
-import * as dos from "./Modules/module_promixified"
+import { log, info, error, debug, prettify } from "./modules/module_log"
+import { FakeDB } from "./modules/module_db"
+import * as dos from "./modules/module_promixified"
 import { downloadSegments } from "./module_hls_younow"
 import { formatDate, formatTime, formatDateTime } from "./modules/module_utils"
 import { getURL } from "./modules/module_www"
@@ -17,7 +17,12 @@ import { VideoWriter } from "./modules/module_ffmpeg"
 
 // CDN=400 API=200 https://cdn.younow.com/php/api/broadcast/info/user=XXX
 
-const API_URL = "https://api.younow.com"
+
+// api.younow.com = amazon
+// cdn.younow.com = cloudflare
+
+const API = "https://api.younow.com"
+const CDN = "https://cdn.younow.com"
 
 export function extractUser(user): string {
 	/** @todo filtering illegal/HTML chars */
@@ -94,15 +99,15 @@ export function resolveUser(db: DB, user: string | number): Promise<Younow.UserI
  */
 export function getUserInfoByUID(uid): Promise<Younow.UserInfo> {
 	// /includeUserKeyWords=1
-	return getURL(`${API_URL}/php/api/channel/getInfo/channelId=${uid}`)
+	return getURL(`${API}/php/api/channel/getInfo/channelId=${uid}`)
 }
 
 export function getLiveBroadcastByUsername(username): Promise<Younow.LiveBroadcast> {
-	return getURL(`${API_URL}/php/api/broadcast/info/user=${username}`)
+	return getURL(`${API}/php/api/broadcast/info/curId=0/user=${username}`)
 }
 
 export function getLiveBroadcastByUID(uid): Promise<Younow.LiveBroadcast> {
-	return getURL(`${API_URL}/php/api/broadcast/info/channelId=${uid}`)
+	return getURL(`${API}/php/api/broadcast/info/channelId=${uid}/curId=0`)
 }
 
 //** @async {uid} get past broadcasts*/
@@ -121,11 +126,11 @@ export function getArchivedBroadcasts(uid):Promise<any>
 export function getArchivedBroadcast(bid): Promise<Younow.ArchivedBroadcast> {
 	// errorCode:246/Broadcast is still live
 
-	return getURL(`${API_URL}/php/api/broadcast/videoPath/broadcastId=${bid}`)
+	return getURL(`${API}/php/api/broadcast/videoPath/broadcastId=${bid}`)
 }
 
 export function getMoments(uid, next): Promise<Younow.Moments> {
-	return getURL(`${API_URL}/php/api/moment/profile/channelId=${uid}/createdBefore=${next}`)
+	return getURL(`${API}/php/api/moment/profile/channelId=${uid}/createdBefore=${next}`)
 }
 
 // https://api.younow.com/php/api/younow/topBroadcasters/numberOfRecords=20/startFrom=0/tag=${tag}
@@ -133,7 +138,7 @@ export function getMoments(uid, next): Promise<Younow.Moments> {
 
 export function getTrendings(): Promise<Younow.Trendings> {
 	// cdn2
-	return getURL(`${API_URL}/php/api/younow/dashboard/locale=${settings.locale}/trending=50`)
+	return getURL(`${API}/php/api/younow/dashboard/locale=${settings.locale}/trending=50`)
 }
 
 export function getTagInfo(tag): Promise<Younow.TagInfo> {
@@ -223,7 +228,7 @@ export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: numbe
 }
 
 export function getPlaylist(bid): Promise<string> {
-	return getURL(`${API_URL}/php/api/broadcast/videoPath/hls=1/broadcastId=${bid}`, "utf8")
+	return getURL(`${API}/php/api/broadcast/videoPath/hls=1/broadcastId=${bid}`, "utf8")
 }
 
 /** returns Promise<[json:boolean,image:boolean,video:boolean]> */
@@ -341,7 +346,6 @@ export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<an
 }
 */
 
-
 export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
 
 	//20180523 : using rtmp stream instead of HLS after younow change.
@@ -448,7 +452,11 @@ async function moveFile(filename: string) {
 }
 
 export function getFollowed(userId: number, start: number) {
-	return getURL(`https://cdn.younow.com/php/api/channel/getFansOf/channelId=${userId}/startFrom=${start}/numberOfRecords=50`)
+	return getURL(`${API}/php/api/channel/getFansOf/channelId=${userId}/startFrom=${start}/numberOfRecords=50`)
+}
+
+export function getOnlineFollowed(follower: number) {
+	return getURL(`${API}/php/api/channel/getLocationOnlineFansOf/channelId=${follower}/numberOfRecords=50`)
 }
 
 /** Normalize user info
@@ -459,40 +467,40 @@ export function getFollowed(userId: number, start: number) {
  */
 export function convertToUserDB(uid: number, user: Younow.UserInfo): DBUser {
 	let dbuser: DBUser =
-		{
-			ignore: (user as any).ignore || false,
-			comment: (user as any).comment || "---",
+	{
+		ignore: (user as any).ignore || false,
+		comment: (user as any).comment || "---",
 
-			profile: user.profile,
-			userId: user.userId || uid,
+		profile: user.profile,
+		userId: user.userId || uid,
 
-			firstName: user.firstName,
-			lastName: user.lastName,
+		firstName: user.firstName,
+		lastName: user.lastName,
 
-			country: user.country || "XX",
-			state: user.state,
-			city: user.city,
+		country: user.country || "XX",
+		state: user.state,
+		city: user.city,
 
-			description: user.description,
+		description: user.description,
 
-			twitterId: user.twitterId,
-			twitterHandle: user.twitterHandle,
-			youTubeUserName: user.youTubeUserName,
-			youTubeChannelId: user.youTubeChannelId,
-			youTubeTitle: user.youTubeTitle,
-			googleId: user.googleId,
-			googleHandle: user.googleHandle,
-			facebookId: user.facebookId,
-			instagramId: user.instagramId,
-			instagramHandle: user.instagramHandle,
-			facebookPageId: user.facebookId,
-			websiteUrl: user.websiteUrl,
+		twitterId: user.twitterId,
+		twitterHandle: user.twitterHandle,
+		youTubeUserName: user.youTubeUserName,
+		youTubeChannelId: user.youTubeChannelId,
+		youTubeTitle: user.youTubeTitle,
+		googleId: user.googleId,
+		googleHandle: user.googleHandle,
+		facebookId: user.facebookId,
+		instagramId: user.instagramId,
+		instagramHandle: user.instagramHandle,
+		facebookPageId: user.facebookId,
+		websiteUrl: user.websiteUrl,
 
-			dateCreated: user.dateCreated,
-			locale: user.locale,
-			language: user.language,
-			tumblrId: user.tumblrId
-		}
+		dateCreated: user.dateCreated,
+		locale: user.locale,
+		language: user.language,
+		tumblrId: user.tumblrId
+	}
 
 	for (let i in dbuser) {
 		if (dbuser[i] === "" || dbuser[i] === null || dbuser[i] === undefined) {

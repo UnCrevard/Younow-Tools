@@ -28,11 +28,7 @@ export async function cmdFollow(users: string[]) {
 
 			async function monitor() {
 				Promise.all(curators.map(curator => {
-					return getURL(`https://api.younow.com/php/api/channel/getLocationOnlineFansOf/channelId=${curator.userId}/numberOfRecords=50`)
-						.catch(err => {
-							error(err)
-							return null
-						})
+					return younow.getOnlineFollowed(curator.userId)
 				}))
 					.then((curatorsFollowed: Younow.FollowedOnline[]) => {
 						let old = liveBroadcasters

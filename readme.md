@@ -16,6 +16,13 @@ To update younow-tools just type :
 
 ### Change log
 
+20180610/1.0.31
+
+	fix a lowercase problem on linux (thx to torqueyy)
+	add bc shortcut for broadcast
+	fix API hostname
+	😂 Younow forgot to renew their ssl certificate 😂
+
 20180528/1.0.30
 
 	check for ffmpeg installation 

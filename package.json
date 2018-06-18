@@ -1,6 +1,6 @@
 {
   "name": "younow-tools",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "description": "younow cli client",
   "main": "./js/main.js",
   "bin": {
@@ -36,8 +36,7 @@
     "node": ">=6.10.2"
   },
   "changelog": {
-    "1.0.33":
-    [
+    "1.0.33": [
       "add support for snapchat official story (experimental)",
       "add support for periscope live & archived (experimental)",
       "add support for vk.com live (experimental)",

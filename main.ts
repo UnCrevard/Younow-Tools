@@ -20,7 +20,14 @@ export let settings: Settings =
 	locale: null,
 	timeout: null,
 	debug_file: null,
-	production: ("_from" in pkg)
+	production: ("_from" in pkg),
+	json: false,
+	thumbnail: false,
+	snapchat: false,
+	periscope: false,
+	younow: false,
+	vk: false
+
 }
 
 import * as _fs from "fs"
@@ -65,6 +72,9 @@ const enum CommandID {
 }
 
 async function main(args) {
+
+	let commandId = -1
+
 	commander
 		.version(settings.version)
 		.option("-v, --verbose", "verbosity level (-v -vv -vvv)", ((x, v) => v + 1), 0)
@@ -77,6 +87,12 @@ async function main(args) {
 		.option("--fmt <format>", "change the output format (FFMPEG will be enabled)", "ts")
 		.option(`--locale <xx>`, `change the default (en) locale (ww|en|de|es|tr|me)`, `en`)
 		.option("--config <path>", "change config folder", _path.join(process.env.APPDATA || process.env.HOME, "YounowTools"))
+		.option("--json", "save stream informations (advanced)", false)
+		.option("--thumb", "save stream thumbnail", false)
+		.option("--snapchat", "use snapchat (experimental)", false)
+		.option("--periscope", "use periscope (experimental)", false)
+		.option("--vk", "use vk (experimental)", false)
+		.option("--younow", "use younow (default)", false)
 
 	commander
 		.command("follow <users...>")
@@ -85,28 +101,28 @@ async function main(args) {
 
 	commander
 		.command("add <users...>")
-		.description("add user(s) by username, uid, URL to db")
+		.description("(younow) add user(s) by username, uid, URL to db")
 		.action((users, cmd) => commandId = CommandID.add)
 
 	commander
 		.command("remove <users...>")
 		.alias("rm")
-		.description("remove users(s) by username, uid, URL from db")
+		.description("(younow) remove users(s) by username, uid, URL from db")
 		.action((users, cmd) => commandId = CommandID.remove)
 
 	commander
 		.command("ignore <users...>")
-		.description("ignore/unignore users(s) by username, uid, URL from db")
+		.description("(younow) ignore/unignore users(s) by username, uid, URL from db")
 		.action((users, cmd) => commandId = CommandID.ignore)
 
 	commander
 		.command(`note <user> [text]`)
-		.description(`add a "note" (quoted) to a user in db`)
+		.description(`(younow) add a "note" (quoted) to a user in db`)
 		.action((users, cmd) => commandId = CommandID.annotation)
 
 	commander
 		.command("search <patterns...>")
-		.description("search in db for matching pattern(s)")
+		.description("(younow) search in db for matching pattern(s)")
 		.action((users, cmd) => commandId = CommandID.search)
 
 	commander
@@ -121,22 +137,21 @@ async function main(args) {
 
 	commander
 		.command("vcr <users...>")
-		.description("download archived broadcast if available")
+		.description("download archived broadcast(s) if available +snapchat +periscope +vk")
 		.action((users, cmd) => commandId = CommandID.vcr)
 
 	commander
 		.command("live <users...>")
-		.description("download live broadcast from the beginning")
+		.description("download live or archived broadcast(s) +periscope +vk")
 		.action((users, cmd) => commandId = CommandID.live)
 
 	commander
 		.command("broadcast <broadcastId...>")
 		.alias("bc")
-		.description("download broadcastId ")
+		.description("(younow) download broadcastId(s)")
 		.action((users, cmd) => commandId = CommandID.broadcast)
 
 	commander
-
 		.command("scan <config_file>")
 		.description("scan live broadcasts")
 		.action((users, cmd) => commandId = CommandID.scan)
@@ -148,21 +163,25 @@ async function main(args) {
 
 	commander
 		.command("fixdb")
-		.description("normalize db informations (advanced)")
+		.description("(younow) normalize db informations (advanced)")
 		.action((users, cmd) => commandId = CommandID.fixdb)
 
-	commander
-		.command("debug [params...]")
-		.description("debug tool ignore this")
-		.action(() => commandId = CommandID.debug)
+	if (!settings.production) {
+		commander
+			.command("debug [params...]")
+			.description("debug tool ignore this")
+			.action(() => commandId = CommandID.debug)
+	}
 
-	let commandId = -1
+	debug("args", args)
+
 	commander.parse(args)
+
 	let params: any = commander.args[0] // string|string[]
 
-	//setVerbose(commander["verbose"] || 0)
-
 	global.verbosity = commander["verbose"] || 0
+
+
 
 	settings.pathConfig = commander["config"]
 	// settings.debug_file=_path.join(settings.pathConfig,`debug_${formatDateTime(new Date())}.log`)
@@ -172,9 +191,18 @@ async function main(args) {
 	settings.pathMove = commander["mv"] || null
 	settings.parallelDownloads = commander["limit"] || 5
 	settings.videoFormat = commander["fmt"]
-	settings.useFFMPEG = settings.FFMPEG_DEFAULT
+	settings.useFFMPEG = commander["ffmpeg"] || null
 	settings.locale = commander["locale"].toLowerCase()
 	settings.timeout = commander["timer"]
+	settings.thumbnail = commander["thumb"]
+	settings.json = commander["json"]
+	settings.snapchat = commander["snapchat"]
+	settings.periscope = commander["periscope"]
+	settings.vk = commander["vk"]
+
+	if (!(settings.snapchat || settings.periscope || settings.vk)) {
+		settings.younow = true
+	}
 
 	if (!await dos.exists(settings.pathConfig)) {
 
@@ -191,28 +219,27 @@ async function main(args) {
 		await dos.createDirectory(settings.pathDownload)
 	}
 
-	if (settings.videoFormat.toLowerCase() != "ts") {
-		if (!settings.useFFMPEG) {
-			switch (settings.videoFormat.toLowerCase()) {
-				case "mp4":
-					/** fix for mp4 */
-					settings.useFFMPEG = settings.FFMPEG_DEFAULT + " -bsf:a aac_adtstoasc"
-					break
+	if (!settings.useFFMPEG) {
+		switch (settings.videoFormat.toLowerCase()) {
+			case "mp4":
+				/** fix for mp4 */
+				settings.useFFMPEG = settings.FFMPEG_DEFAULT + " -bsf:a aac_adtstoasc"
+				break
 
-				case "mkv":
-					settings.useFFMPEG = settings.FFMPEG_DEFAULT
-					break
+			case "mkv":
+			case "ts":
+				settings.useFFMPEG = settings.FFMPEG_DEFAULT
+				break
 
-				default:
-					error(`Video format ${settings.videoFormat} not supported`)
-			}
+			default:
+				error(`Video format ${settings.videoFormat} not supported`)
 		}
 	}
 
 	info(prettify(settings))
 
 	if (settings.production) {
-		setTimeout(checkUpdate, 30 * Time.SECOND)
+		checkUpdate()
 	}
 	else {
 		error("dev mode detected")
@@ -251,7 +278,7 @@ async function main(args) {
 			break
 
 		case CommandID.vcr:
-			cmdVCR(params)
+			cmdVCR(settings, params)
 			break
 
 		case CommandID.follow:
@@ -263,7 +290,7 @@ async function main(args) {
 			break
 
 		case CommandID.live:
-			cmdLive(params)
+			cmdLive(settings, params)
 			break
 
 		case CommandID.broadcast:
@@ -271,7 +298,7 @@ async function main(args) {
 			break
 
 		case CommandID.api:
-			cmdAPI()
+			cmdAPI(settings, params)
 			break
 
 		case CommandID.fixdb:
@@ -316,7 +343,7 @@ async function main(args) {
 		case CommandID.debug:
 			//log(pkg)
 			//log(commander)
-			require("./cmd_debug").cmdDebug(params)
+			require("./cmd_debug").cmdDebug(settings, params)
 			break
 
 		default:

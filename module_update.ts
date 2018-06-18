@@ -11,11 +11,11 @@ export const checkUpdate = async function() {
 
 		if (local.version < current.version) {
 
-			error("#\n#\n#\n#\n#\n#\n#\n#\n")
+			error("#\n#\n#\n#\n#\n#\n#\n#")
 			error(`A new version of ${current.name} is available ${current.version}`)
-			error(`Changelog : ${current.changelog}`)
+			log((current.changelog[current.version] as any).join("\n"))
 			error(`Update with npm -g install ${current.name}`)
-			error("#\n#\n#\n#\n#\n#\n#\n#\n")
+			error("#\n#\n#\n#\n#\n#\n#\n#")
 		}
 	}
 	catch (err) {

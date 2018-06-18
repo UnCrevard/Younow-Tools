@@ -59,7 +59,7 @@ class FakeDB {
     }
     parse(db, lines) {
         for (let line of lines) {
-            let m = line.match(/([+-@])(\w+):*(.*)/);
+            let m = line.match(/([+-@])(.+?)\:(.*)/);
             if (m) {
                 switch (m[1]) {
                     case "@":

@@ -16,7 +16,14 @@ To update younow-tools just type :
 
 ### Change log
 
-20180610/1.0.31
+20180618/1.0.33
+
+	add support for snapchat official story (experimental)
+	add support for periscope live & archived (experimental)
+	add support for vk.com live (experimental)
+	feedbacks are welcome ;)
+
+20180610/1.0.32
 
 	fix a lowercase problem on linux (thx to torqueyy)
 	add bc shortcut for broadcast
@@ -214,6 +221,51 @@ Use ffmpeg to encode the video.
 **FFMPEG MUST BE IN YOUR PATH (on Windows) OR INSTALLED (on Linux)**
 
 	younow -v add user
+
+### --json
+
+	save belong the video a json file with some infos about the stream.
+
+### --thumb
+
+	save belong the video the thumbnail of the video.
+
+### --snapchat
+
+	Download official snapchat stories (not in cache) from an official account :
+
+	younow --snapchat live selenagomez emrata
+
+### --periscope
+
+	Download a live or archived stream of an user(s)
+
+	younow --periscope live username
+
+	Download all (not in cache) archived stream of an user(s)
+
+	younow --periscope vcr username
+
+	username syntax :
+		username as an username
+		username as a broadcast url https://www.pscp.tv/w/broadcast
+
+### --vk
+
+	Download a live stream from vk.com
+
+	younow --vk live "url"
+
+	/!\ url contains "&" so it needs to be quoted /!\
+
+### snapchat / periscope / vk
+
+	these are experimental so don't expect too much.
+
+	You can use urls from liveomg.com, 4dhs.com, periscope site etc...
+
+	--mv is not working
+	no live rewind
 
 ### -h --help
 

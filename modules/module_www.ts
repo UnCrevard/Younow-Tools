@@ -94,3 +94,22 @@ export function post(url, form): Promise<any> {
 		})
 	})
 }
+
+/**
+ * @function download stream to file
+ * @param  {string}
+ * @param  {string}
+ * @return {Promise<any>}
+ */
+export function download(url: string, filename: string): Promise<any> {
+	return new Promise((resolve, reject) => {
+		req(url)
+			.on("error", err => {
+				reject(err)
+			})
+			.on("end", err => {
+				resolve(err)
+			})
+			.pipe(fs.createWriteStream(filename))
+	})
+}

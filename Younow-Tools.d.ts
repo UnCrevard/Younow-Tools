@@ -458,6 +458,12 @@ interface Settings {
 	timeout: number
 	debug_file: string
 	production: boolean
+	json: boolean
+	thumbnail: boolean
+	snapchat: boolean
+	younow: boolean
+	periscope: boolean
+	vk: boolean
 }
 
 interface LiveUser {

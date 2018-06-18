@@ -80,7 +80,7 @@ export class FakeDB {
 	 */
 	parse(db, lines: string[]) {
 		for (let line of lines) {
-			let m = line.match(/([+-@])(\w+):*(.*)/)
+			let m = line.match(/([+-@])(.+?)\:(.*)/)
 
 			if (m) {
 				switch (m[1]) {

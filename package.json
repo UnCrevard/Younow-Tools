@@ -36,6 +36,13 @@
     "node": ">=6.10.2"
   },
   "changelog": {
+    "1.0.33":
+    [
+      "add support for snapchat official story (experimental)",
+      "add support for periscope live & archived (experimental)",
+      "add support for vk.com live (experimental)",
+      "feedbacks are welcome"
+    ],
     "1.0.32": [
       "fix a lowercase problem on linux (thx to torqueyy)",
       "add bc shortcut for broadcast",

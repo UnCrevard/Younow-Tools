@@ -5,9 +5,8 @@ enum Verbosity {
 	dump	// red json
 }
 
-export function log(...args) {
-	console.log("\u001b[97m" + args.join(" ") + "\u001b[39m")
-}
+export const log = console.log
+//console.log("\u001b[97m" + args.join(" ") + "\u001b[39m")
 
 export function info(...args) {
 	if (global.verbosity >= Verbosity.info) {
@@ -17,12 +16,12 @@ export function info(...args) {
 
 export function debug(...args) {
 	if (global.verbosity >= Verbosity.debug) {
-		log("\u001b[92m" + args.join(" ") + "\u001b[39m")
+		console.log("\u001b[92m" + args.join(" ") + "\u001b[39m")
 	}
 }
 
 export function error(...args) {
-	log("\u001b[91m" + args.join(" ") + "\u001b[39m")
+	console.log("\u001b[91m" + args.join(" ") + "\u001b[39m")
 	return args
 }
 

@@ -3,6 +3,7 @@ export const MINUTE = 1000 * 60;
 export const HOUR = 1000 * 60 * 60;
 
 export enum Time {
+	MILLI = 1000,
 	SECOND = 1000,
 	MINUTE = 60000,
 	HOUR = 60000 * 60

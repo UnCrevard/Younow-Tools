@@ -14,7 +14,7 @@ export const API = "https://proxsee.pscp.tv/api/v2/"
 
 export function getBroadcast(bid): Promise<Periscope.VideoPublic> {
 	// @FIX:error
-	return getURL(`${API}/accessVideoPublic?broadcast_id=${bid}`)
+	return getURL(`${API}accessVideoPublic?broadcast_id=${bid}`)
 }
 
 export function createFilename(broadcast: Periscope.Broadcast) {

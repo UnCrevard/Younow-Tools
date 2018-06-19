@@ -142,7 +142,7 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 	}
 	else if (settings.periscope) {
 
-		const db = await new FakeDB().open("periscope.json", "Periscope lives")
+		const db = await new FakeDB().open(path.join(settings.pathConfig, "periscope.json"), "Periscope lives")
 
 		users.forEach(async user => {
 			let url = periscope.parseURL(user)
@@ -221,7 +221,11 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 																				cbAsync()
 																			}
 																		})
-																		.catch(err => error)
+																		.catch(err => {
+
+																			error(err)
+																			cbAsync()
+																		})
 																}
 																else {
 																	cbAsync()

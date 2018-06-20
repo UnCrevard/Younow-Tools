@@ -31,5 +31,5 @@ export function formatDateTime(date: Date): string {
 // windows & Linux
 
 export function cleanFilename(filename: string): string {
-	return filename.replace(/[*?:/\\]/gi, "_")
+	return filename.replace(/[\|*?:/\\\&]/gi, "_")
 }

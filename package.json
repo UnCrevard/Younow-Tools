@@ -1,6 +1,6 @@
 {
   "name": "younow-tools",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "description": "younow cli client",
   "main": "./js/main.js",
   "bin": {

@@ -1,6 +1,6 @@
 {
   "name": "younow-tools",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "description": "younow cli client",
   "main": "./js/main.js",
   "bin": {
@@ -36,11 +36,10 @@
     "node": ">=6.10.2"
   },
   "changelog": {
-    "1.0.36":[
+    "1.0.36": [
       "quick hack to make it works with the last younow update"
-
     ],
-    "1.0.35":[
+    "1.0.35": [
       "--filename option to format output filename"
     ],
     "1.0.34": [

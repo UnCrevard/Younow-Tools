@@ -3,6 +3,7 @@ import { log, info, debug, error } from "./module_log"
 import * as ffmpeg from "./module_ffmpeg"
 import { exists, writeFile } from "./module_promixified"
 import { getURL } from "./module_www"
+import { noop } from "./module_utils"
 
 /**
 *
@@ -21,7 +22,7 @@ function openStream(filename, ffmpegParams: string, rotate: number): ffmpeg.Vide
 
 	// -bsf:a aac_adtstoasc
 
-	return new ffmpeg.VideoWriter(filename, ffmpegParams)
+	return new ffmpeg.VideoWriter("-",filename, ffmpegParams,noop)
 }
 
 function writeStream(stream: ffmpeg.VideoWriter, data: Buffer, callback: Function) {
@@ -43,6 +44,9 @@ function closeStream(stream: ffmpeg.VideoWriter) {
  * @param {Function} callback(result:boolean)
  */
 export function hls(playlistURL: string, filename: string, ffmpegParams: string, rotate: number, isLive: boolean, callback) {
+
+	if (!playlistURL || !filename) throw "hls invalid params"
+
 	let lastSegment = 0
 	let timer = 3000
 	let root = playlistURL.substr(0, playlistURL.lastIndexOf("/") + 1)

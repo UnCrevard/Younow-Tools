@@ -5,6 +5,7 @@ desktop.ini
 *.log
 
 /node_modules/
+/Tests/
 
 /cmd_debug.ts
 /js/cmd_debug.js

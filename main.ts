@@ -1,7 +1,12 @@
 
-global.verbosity = 0
+global.system = {
+	maxParallelDownload: 10,
+	verbosity: 0,
+	maxRetry: 2
+}
 
 const pkg: Package = require("../package.json")
+const FFMPEG_DEFAULT= "-hide_banner -loglevel error -c copy -video_track_timescale 0"
 
 global.settings =
 	{
@@ -14,7 +19,6 @@ global.settings =
 		pathConfig: null,
 		parallelDownloads: null,
 		useFFMPEG: null,
-		FFMPEG_DEFAULT: "-hide_banner -loglevel error -c copy -video_track_timescale 0",
 		videoFormat: null,
 		args: null,
 		locale: null,
@@ -27,7 +31,15 @@ global.settings =
 		periscope: false,
 		younow: false,
 		vk: false,
-		filenameTemplate:"%country_%username_%date_%id"
+		/*
+
+		title
+		date
+		id
+		type
+
+		*/
+		filenameTemplate:null
 	}
 
 import * as _fs from "fs"
@@ -93,6 +105,7 @@ async function main(args) {
 		.option("--periscope", "use periscope (experimental)", false)
 		.option("--vk", "use vk (experimental)", false)
 		.option("--younow", "use younow (default)", false)
+		.option("--filename <template>","filename template","service_country_username_date_type_bid")
 
 	commander
 		.command("follow <users...>")
@@ -179,7 +192,7 @@ async function main(args) {
 
 	let params: any = commander.args[0] // string|string[]
 
-	global.verbosity = commander["verbose"] || 0
+	global.system.verbosity = commander["verbose"] || 0
 
 
 
@@ -199,6 +212,8 @@ async function main(args) {
 	global.settings.snapchat = commander["snapchat"]
 	global.settings.periscope = commander["periscope"]
 	global.settings.vk = commander["vk"]
+
+	global.settings.filenameTemplate=commander["filename"]
 
 	if (!(global.settings.snapchat || global.settings.periscope || global.settings.vk)) {
 		global.settings.younow = true
@@ -222,13 +237,14 @@ async function main(args) {
 	if (!global.settings.useFFMPEG) {
 		switch (global.settings.videoFormat.toLowerCase()) {
 			case "mp4":
-				/** fix for mp4 */
-				global.settings.useFFMPEG = global.settings.FFMPEG_DEFAULT + " -bsf:a aac_adtstoasc"
+			case "flv":
+				/** fix for mp4 & flv*/
+				global.settings.useFFMPEG = FFMPEG_DEFAULT + " -bsf:a aac_adtstoasc"
 				break
 
 			case "mkv":
 			case "ts":
-				global.settings.useFFMPEG = global.settings.FFMPEG_DEFAULT
+				global.settings.useFFMPEG = FFMPEG_DEFAULT
 				break
 
 			default:

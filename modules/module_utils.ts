@@ -1,5 +1,6 @@
 import * as _fs from "fs"
 import * as _path from "path"
+import {error} from "./module_log"
 
 /* date & time */
 
@@ -34,23 +35,29 @@ export function formatDateTime(date: Date): string {
 // windows & Linux
 
 export function cleanFilename(filename: string): string {
-	// .replace(/[^\x20-\xFF]/g, "");
-	return filename.replace(/["'|*?:/&\\]/gi, "_")
+	return filename.replace(/[\x00-\x1f"<>|*?:/\\]/gi, "_")
 }
-
-/* html */
 
 export function cleanHTML(html: string): string {
 
-	return html.replace(/&#(\d+);/g, (x, y) => {
-		return String.fromCharCode(y)
-	})
+	return html.replace(/&#(\d+);/g, (x, y) => String.fromCharCode(y))
 }
-
-/* net */
 
 export function getFirefoxUserAgent(): string {
 	let date = new Date()
 	let version = ((date.getFullYear() - 2018) * 4 + Math.floor(date.getMonth() / 4) + 58) + ".0"
 	return `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${version} Gecko/20100101 Firefox/${version}`
 }
+
+export function noop(){}
+
+export function promisify(func: (resolve, reject?) => any) {
+	return new Promise(func)
+}
+
+
+export function cbError(err:NodeJS.ErrnoException)
+{
+	if (err) error(err.stack||err.message||err)
+}
+

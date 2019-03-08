@@ -2,6 +2,7 @@ import { getURL, download } from "./module_www"
 import { log, error } from "./module_log"
 import { hls } from "./module_hls"
 import { cleanFilename, formatDateTime, Time } from "./module_utils"
+import * as _path from "path"
 
 // user == url:string as https://vk.com/video_ext.php?oid=${broadcastId}&id=${userId}&hash=${wtf}
 //
@@ -35,12 +36,12 @@ export function downloadBroadcast(basename: string, broadcast: VK.Broadcast) {
 }
 
 export function CreateFilename(broadcast: VK.Broadcast): string {
-	return cleanFilename(global.settings.filenameTemplate
-		.replace("%country", "XX")
-		.replace("%username", broadcast.md_author)
-		.replace("%title", broadcast.md_title)
-		.replace("%date", formatDateTime(new Date(broadcast.date * Time.MILLI)))
-		.replace("%id", broadcast.vid.toString())
-		.replace("%service", "vk")
-		.replace(/%\w+/, "")).replace(/[^\x20-\xFF]/g, "");
+	return _path.join(global.settings.pathDownload,cleanFilename(global.settings.filenameTemplate
+		.replace("country", "RU")
+		.replace("username", broadcast.md_author)
+		.replace("title", broadcast.md_title)
+		.replace("date", formatDateTime(new Date(broadcast.date * Time.MILLI)))
+		.replace("bid", broadcast.vid.toString())
+		.replace("service", "Vk")
+		.replace("type",broadcast.postlive_mp4?"replay":"live")))
 }

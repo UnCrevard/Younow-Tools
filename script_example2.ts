@@ -1,3 +1,5 @@
+export {}
+
 declare var tag:Younow.Tag
 declare var user:Younow.TagInfoUser
 declare var broadcast:Younow.LiveBroadcast

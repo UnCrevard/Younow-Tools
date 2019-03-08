@@ -2,9 +2,14 @@ import * as fs from "fs"
 import * as _path from "path"
 import * as vm from "vm"
 import { execFile } from "child_process"
-import { log, info, debug, dump, error } from "./modules/module_log"
+import { log, info, debug, dump, error,prettify } from "./modules/module_log"
 import * as _younow from "./modules/module_younow"
 import { FakeDB } from "./modules/module_db"
+import { HLS } from "./module_hls"
+import {ffmpeg} from "./module_ffmpeg"
+
+import * as P from "./modules/module_promixified"
+import {cbError,promisify} from "./modules/module_utils"
 
 // global
 
@@ -38,6 +43,7 @@ function update_scan(db: DB, streams: Array<any>) {
 	_younow.getTrendings()
 		.then(function(trendings: Younow.Trendings) {
 			let tags = trendings.trending_tags.filter(function(tag) {
+
 				// 1st pass tag filtering
 
 				return runScript(tag, null, null) || false
@@ -206,7 +212,8 @@ function update_scan(db: DB, streams: Array<any>) {
 										liveuser.broadcastId = user.broadcastId
 
 										_younow.downloadThemAll(infos)
-											.then(([thumb, video, json]) => {
+											.then(([thumb, video, json]) =>
+											{
 												log(`${user.profile} is over json : ${thumb} image : ${video} video :${json}`)
 											}, err => {
 												error(err)

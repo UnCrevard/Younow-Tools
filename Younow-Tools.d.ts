@@ -33,7 +33,6 @@ declare interface Settings {
 	noDownload: boolean
 	parallelDownloads: number
 	pathConfig: string
-	readonly FFMPEG_DEFAULT: string
 	useFFMPEG: string
 	videoFormat: string
 	args: string[]
@@ -51,12 +50,10 @@ declare interface Settings {
 }
 declare module NodeJS {
 	interface Global {
-		verbosity: number,
+		//verbosity: number,
 		settings: Settings
 	}
 }
-
-
 
 interface LiveUser {
 	[index: number]:

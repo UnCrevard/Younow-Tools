@@ -1,83 +1,59 @@
-import * as fs from "fs"
+import * as FS from "fs"
 import { spawn, ChildProcess } from "child_process"
 import { log, info, error, debug } from "./module_log"
+import {noop} from "./module_utils"
 
-/**
- * [VideoWriter description]
- * @type {[type]}
- */
 export class VideoWriter {
-	private stream: fs.WriteStream = null
+
+	private stream: FS.WriteStream = null
 	private ffmpeg: ChildProcess = null
 	private filename: string = null
-	/**
-	 * [constructor description]
-	 * @param {string} filename  [description]
-	 * @param {string} useFFMPEG [description]
-	 */
-	constructor(filename: string, useFFMPEG: string) {
+
+	constructor(source:string,filename: string, useFFMPEG: string,callback:(result:boolean)=>void) {
+
 		this.filename = filename
 
-		if (useFFMPEG) {
+		//@ugly
 
-			//@ugly
+		let params = ["-i", source].concat(useFFMPEG.split(" "))
 
-			let params = ["-i", "-"].concat(useFFMPEG.split(" "))
+		params.push(filename)
 
-			params.push(filename)
+		info(`FFMPEG : ${params.join(" ")}`)
 
-			info(`FFMPEG : ${params.join(" ")}`)
+		this.ffmpeg = spawn("ffmpeg", params)
 
-			this.ffmpeg = spawn("ffmpeg", params)
+		this.ffmpeg.on("error", err => {
+			error(err)
+			callback(false)
+		})
 
-			this.ffmpeg.on("error", err => {
-				error(err)
-			})
+		// exit then close
 
-			// 0 exit -> close
+		this.ffmpeg.on("exit", code => {
+			info(`FFMPEG exit ${code}`)
+		})
 
-			this.ffmpeg.on("exit", code => {
-				info(`FFMPEG exit ${code}`)
-			})
+		this.ffmpeg.on("close", code => {
+			info(`FFMPEG close ${code}`)
+			this.ffmpeg = null
+			callback(code===0)
+		})
 
-			this.ffmpeg.on("close", code => {
-				info(`FFMPEG close ${code}`)
-				this.ffmpeg = null
-			})
+		this.ffmpeg.stderr.on("data", noop)
 
-			this.ffmpeg.stderr.on("data", data => {
-				//error(data.toString())
-			})
-
-			this.ffmpeg.stdin.on("error", err => err)
-		}
-		else {
-			this.stream = fs.createWriteStream(filename)
-		}
+		this.ffmpeg.stdin.on("error", noop)
 	}
-	/**
-	 * [close description]
-	 * @param {Function} callback [description]
-	 */
+
 	close(callback: Function) {
 		if (this.ffmpeg) {
-			this.ffmpeg.stdin.end(callback)
-		}
-		else if (this.stream) {
-			this.stream.end(callback)
+			this.ffmpeg.stdin.end()
 		}
 	}
-	/**
-	 * [write description]
-	 * @param {Buffer}   data     [description]
-	 * @param {Function} callback [description]
-	 */
+
 	write(data: Buffer, callback: Function) {
 		if (this.ffmpeg && data) {
-			this.ffmpeg.stdin.write(data, callback)
-		}
-		else if (this.stream && data) {
-			this.stream.write(data, callback)
+			this.ffmpeg.stdin.write(data)
 		}
 	}
 }

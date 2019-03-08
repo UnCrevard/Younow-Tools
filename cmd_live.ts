@@ -56,7 +56,7 @@ export function cmdLive(settings: Settings, users: string[]) {
 
 					let broadcast=await _vk.getBroadcast(user)
 
-					let basename=_path.join(settings.pathDownload,_vk.CreateFilename(broadcast)+".")
+					let basename=_vk.CreateFilename(broadcast)+"."
 
 					if (broadcast.mp4 || broadcast.postlive_mp4) {
 
@@ -111,7 +111,7 @@ export function cmdLive(settings: Settings, users: string[]) {
 
 					log("download", video.broadcast.user_display_name, video.broadcast.status)
 
-					let basename = _path.join(settings.pathDownload,periscope.createFilename(video.broadcast))
+					let basename =periscope.createFilename(video.broadcast)
 
 					if (settings.thumbnail) {
 						periscope.downloadThumbnail(basename+".jpg",video.broadcast).catch(error)

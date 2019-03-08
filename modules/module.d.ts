@@ -1,6 +1,11 @@
 
 declare module NodeJS {
 	interface Global {
-		verbosity: number
+		system:
+		{
+			verbosity: number
+			maxRetry:number
+			maxParallelDownload:number
+		}
 	}
 }

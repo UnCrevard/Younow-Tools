@@ -7,7 +7,7 @@
 		"inlineSourceMap": true,
 		"outDir": "js/",
 		"removeComments": true,
-		"allowSyntheticDefaultImports": true,
+		//"allowSyntheticDefaultImports": true,
 		"typeRoots" : ["../__Typing/"],
 		//"noEmitOnError":true
 	},

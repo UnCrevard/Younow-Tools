@@ -16,6 +16,17 @@ To update younow-tools just type :
 
 ### Change log
 
+20190308/1.0.36
+
+	after the last update younow is not using flash anymore to stream (rtmp)
+	but now they are streaming thought websocket and I have no knowledge of such a protocol...
+	so the commands scan / live WILL NOT DOWNLOAD IN REALTIME BUT AFTER THE END OF THE BROADCAST.
+	
+20190308/1.0.35
+
+	add --filename <template>
+	add --replay
+
 20180618/1.0.33
 
 	add support for snapchat official story (experimental)

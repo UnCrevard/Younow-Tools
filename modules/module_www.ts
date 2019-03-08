@@ -19,11 +19,12 @@ export const jar = Request.jar()
 
 const config: Request.CoreOptions = {
 	jar: jar,
+	followAllRedirects: true,
 	headers:
 	{
 		"user-agent": getFirefoxUserAgent(),
 		"Accept-Language": "en-us, en; q=0.5"
-		,Accept:"*/*"
+		,Accept: "*/*"
 	},
 	gzip: true,
 	encoding: null
@@ -33,15 +34,15 @@ debug(config)
 
 export const req = Request.defaults(config)
 
-export function getURL(url, encoding = "json"): Promise<any> {
+export async function getURL(url, encoding = "json"): Promise<any> {
+
 	debug(url, encoding)
 
+	if (!url) throw "getURL : empty url"
+
+	if (!(encoding === null || encoding === "utf-8" || encoding=="utf8" || encoding === "json")) throw `getURL : bad encoding ${encoding}`
+
 	return new Promise(function(resolve, reject) {
-		if (!url || url.length == 0) {
-			error(`getURL ${url}`)
-			reject(-1)
-			return
-		}
 
 		req.get(url, function(err, res, body: Buffer) {
 			if (err) {

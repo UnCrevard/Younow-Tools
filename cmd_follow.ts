@@ -65,9 +65,11 @@ export async function cmdFollow(users: string[]) {
 													break
 
 												case Younow.FollowedStatus.broadcasting:
-
 													younow.getLiveBroadcastByUID(userId)
 														.then(live => {
+
+															log(`${live.profile} is broadcasting ${live.broadcastId} ${younow.errortoString(live)}`)
+
 															if (live.errorCode || live.lastSegmentId == undefined) {
 																// retry if not ready
 																broadcaster.status = null

@@ -2,6 +2,7 @@ import * as Progress from "progress"
 import { log, info, error } from "./module_log"
 import { VideoWriter } from "./module_ffmpeg"
 import { getURL } from "./module_www"
+import { noop } from "./module_utils"
 
 /**
  * download segments for rewind/archive
@@ -19,7 +20,7 @@ export function downloadSegments(settings: Settings, url: string,
 	let counter = 0
 	let ptr = 0
 	let buffers: Array<Buffer> = []
-	let stream = new VideoWriter(video_filename, settings.useFFMPEG)
+	let stream = new VideoWriter("-",video_filename, settings.useFFMPEG,noop)
 
 	return new Promise(resolve => {
 		function downloadSegment() {

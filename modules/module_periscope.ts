@@ -1,7 +1,9 @@
+/// <reference path="../../__typing/periscope.d.ts" />
+
 import * as path from "path"
 import * as url from "url"
 import { formatDateTime, cleanFilename } from "./module_utils"
-import { log, error } from "./module_log"
+import { log, error,prettify } from "./module_log"
 import * as promisify from "./module_promixified"
 import { hls } from "./module_hls"
 
@@ -10,17 +12,31 @@ import { getURL, download } from "./module_www"
 export const PERISCOPE_URL = "www.pscp.tv"
 export const API = "https://proxsee.pscp.tv/api/v2/"
 
-
 export function getBroadcast(bid): Promise<Periscope.VideoPublic> {
 	// @FIX:error
 	return getURL(`${API}accessVideoPublic?broadcast_id=${bid}`)
 }
 
 export function createFilename(broadcast: Periscope.Broadcast) {
-	return `${broadcast.language || "XX"}_${broadcast.username}_${formatDateTime(new Date(broadcast.created_at))}${broadcast.state == "ENDED" ? "" : "_live"}_${cleanFilename(broadcast.status)}`
+
+	return path.join(global.settings.pathDownload,cleanFilename(global.settings.filenameTemplate
+		.replace("service","Periscope")
+		.replace("country", broadcast.iso_code||broadcast.language||"XX")
+		.replace("username", broadcast.username)
+		.replace("title", broadcast.status)
+		.replace("date", formatDateTime(new Date(broadcast.created_at)))
+		.replace("bid", broadcast.id)
+		.replace("type",broadcast.state=="ENDED"?"replay":"live")
+		))
 }
 
 export function downloadVideo(filename: string, video: Periscope.VideoPublic) {
+
+	if (!video.replay_url && !video.https_hls_url)
+	{
+		error(prettify(video))
+	}
+
 	if (video.replay_url) {
 
 		return new Promise(resolve => {

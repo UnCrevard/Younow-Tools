@@ -67,6 +67,16 @@ export async function getCurrentDirectory() {
 	return process.cwd()
 }
 
+export function stats(filename:string):Promise<fs.Stats>
+{
+	return new Promise((resolve,reject)=>
+	{
+		fs.stat(filename,(err,stats:any)=>
+		{
+			err?reject(err):resolve(stats)
+		})
+	})
+}
 export function timeout(timeout: number) {
 	return new Promise((resolve, reject) => {
 		setTimeout(resolve, timeout)

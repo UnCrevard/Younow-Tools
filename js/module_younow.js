@@ -216,7 +216,7 @@ function downloadThumbnail(live) {
             let filename = createFilename(live) + ".jpg";
             let exists = yield dos.exists(filename);
             if (!exists) {
-                let image = yield module_www_1.getURL(live.awsUrl, null);
+                let image = yield module_www_1.getURL(`https://ynassets.younow.com/broadcastdynamic/live/${live.broadcastId}/${live.broadcastId}.jpg`, null);
                 yield dos.writeFile(filename, image);
                 yield moveFile(filename);
                 module_log_1.info("downloadThumbnail", image.length, filename);

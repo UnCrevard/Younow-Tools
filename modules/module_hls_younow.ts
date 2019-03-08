@@ -1,7 +1,7 @@
 import * as Progress from "progress"
-import { log, info, error } from "./modules/module_log"
-import { VideoWriter } from "./modules/module_ffmpeg"
-import { getURL } from "./modules/module_www"
+import { log, info, error } from "./module_log"
+import { VideoWriter } from "./module_ffmpeg"
+import { getURL } from "./module_www"
 
 /**
  * download segments for rewind/archive

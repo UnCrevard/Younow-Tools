@@ -1,7 +1,5 @@
-import { settings } from "./main"
-
 import { log, info, debug, error, prettify } from "./modules/module_log"
-import * as younow from "./module_younow"
+import * as younow from "./modules/module_younow"
 import * as _async from "async"
 
 export function cmdSearch(patterns: string[]) {

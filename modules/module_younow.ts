@@ -1,18 +1,16 @@
-import { settings } from "./main"
-
 import * as _fs from "fs"
 import * as _path from "path"
 import * as _url from "url"
 import * as _async from "async"
 import * as _progress from "progress"
 import { execFile, spawn } from "child_process"
-import { log, info, error, debug, prettify } from "./modules/module_log"
-import { FakeDB } from "./modules/module_db"
-import * as dos from "./modules/module_promixified"
-import { downloadSegments } from "./module_hls_younow"
-import { formatDate, formatTime, formatDateTime } from "./modules/module_utils"
-import { getURL } from "./modules/module_www"
-import { VideoWriter } from "./modules/module_ffmpeg"
+import { log, info, error, debug, prettify } from "./module_log"
+import { FakeDB } from "./module_db"
+import * as dos from "./module_promixified"
+import { downloadSegments } from "../modules/module_hls_younow"
+import { formatDate, formatTime, formatDateTime } from "./module_utils"
+import { getURL } from "./module_www"
+import { VideoWriter } from "./module_ffmpeg"
 
 
 // CDN=400 API=200 https://cdn.younow.com/php/api/broadcast/info/user=XXX
@@ -138,7 +136,7 @@ export function getMoments(uid, next): Promise<Younow.Moments> {
 
 export function getTrendings(): Promise<Younow.Trendings> {
 	// cdn2
-	return getURL(`${API}/php/api/younow/dashboard/locale=${settings.locale}/trending=50`)
+	return getURL(`${API}/php/api/younow/dashboard/locale=${global.settings.locale}/trending=50`)
 }
 
 export function getTagInfo(tag): Promise<Younow.TagInfo> {
@@ -154,7 +152,7 @@ export function getTagInfo(tag): Promise<Younow.TagInfo> {
 export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: number, started: number | null): Promise<any> {
 	info("downloadArchive", user.profile, bid)
 
-	if (settings.noDownload) {
+	if (global.settings.noDownload) {
 		return true
 	}
 
@@ -173,7 +171,7 @@ export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: numbe
 	fix.country = user.country
 	fix.awsUrl = archive.broadcastThumbnail
 
-	let video_filename = createFilename(archive as any) + "." + settings.videoFormat
+	let video_filename = createFilename(archive as any) + "." + global.settings.videoFormat
 
 	saveJSON(archive as any).catch(error)
 	downloadThumbnail(archive as any).catch(error)
@@ -211,7 +209,7 @@ export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: numbe
 						clear: true
 					})
 
-				return downloadSegments(settings, url, video_filename, total_segment, bar, false)
+				return downloadSegments(global.settings, url, video_filename, total_segment, bar, false)
 					.then(err => {
 						dos.timeout(10000)
 							.then(err => {
@@ -234,7 +232,7 @@ export function getPlaylist(bid): Promise<string> {
 /** returns Promise<[json:boolean,image:boolean,video:boolean]> */
 
 export async function downloadThemAll(live: Younow.LiveBroadcast) {
-	if (settings.noDownload) {
+	if (global.settings.noDownload) {
 		return [true, true, true]
 	}
 	else {
@@ -251,7 +249,7 @@ export async function downloadThemAll(live: Younow.LiveBroadcast) {
 /*
 export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
 	if (live.errorCode == 0) {
-		let filename = createFilename(live) + "." + settings.videoFormat
+		let filename = createFilename(live) + "." + global.settings.videoFormat
 
 		let exists = await dos.exists(filename)
 
@@ -353,12 +351,12 @@ export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<an
 	if (live.errorCode == 0) {
 
 		return new Promise(async (resolve, reject) => {
-			let filename = createFilename(live) + "." + settings.videoFormat
+			let filename = createFilename(live) + "." + global.settings.videoFormat
 
 			let exists = await dos.exists(filename)
 
 			if (!exists) {
-				let params = `-i rtmp://${live.media.host}${live.media.app}/${live.media.stream} ${settings.useFFMPEG} ${filename}`.split(" ")
+				let params = `-i rtmp://${live.media.host}${live.media.app}/${live.media.stream} ${global.settings.useFFMPEG} ${filename}`.split(" ")
 
 				let ffmpeg = spawn("ffmpeg", params)
 
@@ -404,7 +402,7 @@ export async function downloadThumbnail(live: Younow.LiveBroadcast): Promise<boo
 		let exists = await dos.exists(filename)
 
 		if (!exists) {
-			let image: Buffer = await getURL(live.awsUrl, null)
+			let image: Buffer = await getURL(`https://ynassets.younow.com/broadcastdynamic/live/${live.broadcastId}/${live.broadcastId}.jpg`, null)
 			await dos.writeFile(filename, image)
 			await moveFile(filename)
 			info("downloadThumbnail", image.length, filename)
@@ -435,7 +433,7 @@ export async function saveJSON(live: Younow.LiveBroadcast): Promise<boolean> {
 *
 */
 export function createFilename(live: Younow.LiveBroadcast) {
-	let filename = _path.join(settings.pathDownload, `${live.country || "XX"}_${live.profile}_${formatDateTime(new Date((live.dateStarted || live.dateCreated || Date.now() / 1000) * 1000))}_${live.broadcastId}`)
+	let filename = _path.join(global.settings.pathDownload, `${live.country || "XX"}_${live.profile}_${formatDateTime(new Date((live.dateStarted || live.dateCreated || Date.now() / 1000) * 1000))}_${live.broadcastId}`)
 
 	debug("createFilename", filename)
 
@@ -443,8 +441,8 @@ export function createFilename(live: Younow.LiveBroadcast) {
 }
 
 async function moveFile(filename: string) {
-	if (settings.pathMove) {
-		let newpath = _path.join(settings.pathMove, _path.parse(filename).base)
+	if (global.settings.pathMove) {
+		let newpath = _path.join(global.settings.pathMove, _path.parse(filename).base)
 
 		info("moveFile", filename, newpath)
 		return dos.rename(filename, newpath)
@@ -512,7 +510,7 @@ export function convertToUserDB(uid: number, user: Younow.UserInfo): DBUser {
 }
 
 export function openDB() {
-	return new FakeDB().open(settings.pathDB, "Broadcasters")
+	return new FakeDB().open(global.settings.pathDB, "Broadcasters")
 }
 
 /** Search profile in the db

@@ -1,10 +1,9 @@
-import { settings } from "./main"
 import * as fs from "fs"
 import * as _path from "path"
 import * as vm from "vm"
 import { execFile } from "child_process"
 import { log, info, debug, dump, error } from "./modules/module_log"
-import * as _younow from "./module_younow"
+import * as _younow from "./modules/module_younow"
 import { FakeDB } from "./modules/module_db"
 
 // global
@@ -14,7 +13,7 @@ let script = null
 
 export function cmdScan(script_file: string) {
 	new FakeDB()
-		.open(_path.join(settings.pathConfig, "streams.txt"), "streams")
+		.open(_path.join(global.settings.pathConfig, "streams.txt"), "streams")
 		.then(streams => {
 			return _younow.openDB()
 				.then((db: DB) => {
@@ -22,11 +21,11 @@ export function cmdScan(script_file: string) {
 
 					setInterval(() => {
 						update_scan(db, streams)
-					}, settings.timeout * Utils.Time.MINUTE)
+					}, global.settings.timeout * Utils.Time.MINUTE)
 
 					update_scan(db, streams)
 
-					fs.watchFile(settings.pathDB, (curr, prev) => {
+					fs.watchFile(global.settings.pathDB, (curr, prev) => {
 						info(`DATABASE UPDATED`)
 						db.self.update()
 					})
@@ -79,7 +78,7 @@ function update_scan(db: DB, streams: Array<any>) {
 										check: 0
 									}
 							}
-							if (settings.production == false) {
+							if (global.settings.production == false) {
 								if (user.userId in streams) {
 									if (streams[user.userId].indexOf(user.broadcastId) < 0) {
 										let items = streams[user.userId]

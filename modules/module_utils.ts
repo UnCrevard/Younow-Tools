@@ -1,6 +1,7 @@
-export const SECOND = 1000;
-export const MINUTE = 1000 * 60;
-export const HOUR = 1000 * 60 * 60;
+import * as _fs from "fs"
+import * as _path from "path"
+
+/* date & time */
 
 export enum Time {
 	MILLI = 1000,
@@ -28,8 +29,28 @@ export function formatDateTime(date: Date): string {
 	return formatDate(date) + "_" + formatTime(date)
 }
 
+/* filename */
+
 // windows & Linux
 
 export function cleanFilename(filename: string): string {
-	return filename.replace(/[\|*?:/\\\&]/gi, "_")
+	// .replace(/[^\x20-\xFF]/g, "");
+	return filename.replace(/["'|*?:/&\\]/gi, "_")
+}
+
+/* html */
+
+export function cleanHTML(html: string): string {
+
+	return html.replace(/&#(\d+);/g, (x, y) => {
+		return String.fromCharCode(y)
+	})
+}
+
+/* net */
+
+export function getFirefoxUserAgent(): string {
+	let date = new Date()
+	let version = ((date.getFullYear() - 2018) * 4 + Math.floor(date.getMonth() / 4) + 58) + ".0"
+	return `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${version} Gecko/20100101 Firefox/${version}`
 }

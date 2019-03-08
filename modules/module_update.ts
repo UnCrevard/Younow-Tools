@@ -1,6 +1,6 @@
-import { getURL } from "./modules/module_www"
-import { log, info, debug, error } from "./modules/module_log"
-import { Time } from "./modules/module_utils"
+import { getURL } from "../modules/module_www"
+import { log, info, debug, error } from "../modules/module_log"
+import { Time } from "../modules/module_utils"
 
 export const checkUpdate = async function() {
 	try {

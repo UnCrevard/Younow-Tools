@@ -5,6 +5,8 @@ enum Verbosity {
 	dump	// red json
 }
 
+export const assert=console.assert
+
 export const log = console.log
 //console.log("\u001b[97m" + args.join(" ") + "\u001b[39m")
 

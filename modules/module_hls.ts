@@ -143,8 +143,6 @@ export function hls(playlistURL: string, filename: string, ffmpegParams: string,
 				else {
 					idle++
 
-					//log(`idle ${idle}`)
-
 					if (idle > 30 || isLive == false) {
 						closeStream(stream)
 						callback(true)

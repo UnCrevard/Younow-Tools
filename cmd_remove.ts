@@ -1,5 +1,4 @@
-import { settings } from "./main"
-import * as younow from "./module_younow"
+import * as younow from "./modules/module_younow"
 import { log, info, error } from "./modules/module_log"
 import * as _async from "async"
 

@@ -1,6 +1,5 @@
-import * as younow from "./module_younow"
+import * as younow from "./modules/module_younow"
 import * as database from "./modules/module_db"
-import { settings } from "./main"
 import { log, error } from "./modules/module_log"
 
 export async function cmdFollowed(users: string[]) {

@@ -3,39 +3,39 @@ global.verbosity = 0
 
 const pkg: Package = require("../package.json")
 
-export let settings: Settings =
-{
-	version: pkg.version,
-	pathDB: null,
-	pathDownload: null,
-	generateDownloadFolderDate: false,
-	noDownload: null,
-	pathMove: null,
-	pathConfig: null,
-	parallelDownloads: null,
-	useFFMPEG: null,
-	FFMPEG_DEFAULT: "-hide_banner -loglevel error -c copy -video_track_timescale 0",
-	videoFormat: null,
-	args: null,
-	locale: null,
-	timeout: null,
-	debug_file: null,
-	production: ("_from" in pkg),
-	json: false,
-	thumbnail: false,
-	snapchat: false,
-	periscope: false,
-	younow: false,
-	vk: false
-
-}
+global.settings =
+	{
+		version: pkg.version,
+		pathDB: null,
+		pathDownload: null,
+		generateDownloadFolderDate: false,
+		noDownload: null,
+		pathMove: null,
+		pathConfig: null,
+		parallelDownloads: null,
+		useFFMPEG: null,
+		FFMPEG_DEFAULT: "-hide_banner -loglevel error -c copy -video_track_timescale 0",
+		videoFormat: null,
+		args: null,
+		locale: null,
+		timeout: null,
+		debug_file: null,
+		production: ("_from" in pkg),
+		json: false,
+		thumbnail: false,
+		snapchat: false,
+		periscope: false,
+		younow: false,
+		vk: false,
+		filenameTemplate:"%country_%username_%date_%id"
+	}
 
 import * as _fs from "fs"
 import * as _path from "path"
 import * as _child from "child_process"
 import * as commander from "commander"
 import * as _async from "async"
-import * as _younow from "./module_younow"
+import * as _younow from "./modules/module_younow"
 import { log, info, debug, dump, error, prettify } from "./modules/module_log"
 import { FakeDB } from "./modules/module_db"
 import { cmdAdd } from "./cmd_add"
@@ -51,7 +51,7 @@ import { cmdBroadcast } from "./cmd_broadcast"
 import * as dos from "./modules/module_promixified"
 import { Time } from "./modules/module_utils"
 
-import { checkUpdate } from "./module_update"
+import { checkUpdate } from "./modules/module_update"
 
 const enum CommandID {
 	add,
@@ -76,7 +76,7 @@ async function main(args) {
 	let commandId = -1
 
 	commander
-		.version(settings.version)
+		.version(global.settings.version)
 		.option("-v, --verbose", "verbosity level (-v -vv -vvv)", ((x, v) => v + 1), 0)
 		.option("--dl <path>", "download path (default current dir)")
 		.option("--nodl", "Execute commands without downloading", false)
@@ -166,7 +166,7 @@ async function main(args) {
 		.description("(younow) normalize db informations (advanced)")
 		.action((users, cmd) => commandId = CommandID.fixdb)
 
-	if (!settings.production) {
+	if (!global.settings.production) {
 		commander
 			.command("debug [params...]")
 			.description("debug tool ignore this")
@@ -183,62 +183,62 @@ async function main(args) {
 
 
 
-	settings.pathConfig = commander["config"]
-	// settings.debug_file=_path.join(settings.pathConfig,`debug_${formatDateTime(new Date())}.log`)
-	settings.pathDB = _path.join(settings.pathConfig, "broadcasters.txt")
-	settings.pathDownload = commander["dl"] || "."
-	settings.noDownload = commander["nodl"]
-	settings.pathMove = commander["mv"] || null
-	settings.parallelDownloads = commander["limit"] || 5
-	settings.videoFormat = commander["fmt"]
-	settings.useFFMPEG = commander["ffmpeg"] || null
-	settings.locale = commander["locale"].toLowerCase()
-	settings.timeout = commander["timer"]
-	settings.thumbnail = commander["thumb"]
-	settings.json = commander["json"]
-	settings.snapchat = commander["snapchat"]
-	settings.periscope = commander["periscope"]
-	settings.vk = commander["vk"]
+	global.settings.pathConfig = commander["config"]
+	// global.settings.debug_file=_path.join(global.settings.pathConfig,`debug_${formatDateTime(new Date())}.log`)
+	global.settings.pathDB = _path.join(global.settings.pathConfig, "broadcasters.txt")
+	global.settings.pathDownload = commander["dl"] || "."
+	global.settings.noDownload = commander["nodl"]
+	global.settings.pathMove = commander["mv"] || null
+	global.settings.parallelDownloads = commander["limit"] || 5
+	global.settings.videoFormat = commander["fmt"]
+	global.settings.useFFMPEG = commander["ffmpeg"] || null
+	global.settings.locale = commander["locale"].toLowerCase()
+	global.settings.timeout = commander["timer"]
+	global.settings.thumbnail = commander["thumb"]
+	global.settings.json = commander["json"]
+	global.settings.snapchat = commander["snapchat"]
+	global.settings.periscope = commander["periscope"]
+	global.settings.vk = commander["vk"]
 
-	if (!(settings.snapchat || settings.periscope || settings.vk)) {
-		settings.younow = true
+	if (!(global.settings.snapchat || global.settings.periscope || global.settings.vk)) {
+		global.settings.younow = true
 	}
 
-	if (!await dos.exists(settings.pathConfig)) {
+	if (!await dos.exists(global.settings.pathConfig)) {
 
-		await dos.createDirectory(settings.pathConfig)
+		await dos.createDirectory(global.settings.pathConfig)
 	}
 
-	if (settings.pathMove) {
-		if (!await dos.exists(settings.pathMove)) {
-			await dos.createDirectory(settings.pathMove)
+	if (global.settings.pathMove) {
+		if (!await dos.exists(global.settings.pathMove)) {
+			await dos.createDirectory(global.settings.pathMove)
 		}
 	}
 
-	if (!await dos.exists(settings.pathDownload)) {
-		await dos.createDirectory(settings.pathDownload)
+	if (!await dos.exists(global.settings.pathDownload)) {
+		await dos.createDirectory(global.settings.pathDownload)
 	}
 
-	if (!settings.useFFMPEG) {
-		switch (settings.videoFormat.toLowerCase()) {
+	if (!global.settings.useFFMPEG) {
+		switch (global.settings.videoFormat.toLowerCase()) {
 			case "mp4":
 				/** fix for mp4 */
-				settings.useFFMPEG = settings.FFMPEG_DEFAULT + " -bsf:a aac_adtstoasc"
+				global.settings.useFFMPEG = global.settings.FFMPEG_DEFAULT + " -bsf:a aac_adtstoasc"
 				break
 
 			case "mkv":
 			case "ts":
-				settings.useFFMPEG = settings.FFMPEG_DEFAULT
+				global.settings.useFFMPEG = global.settings.FFMPEG_DEFAULT
 				break
 
 			default:
-				error(`Video format ${settings.videoFormat} not supported`)
+				error(`Video format ${global.settings.videoFormat} not supported`)
 		}
 	}
 
-	info(prettify(settings))
+	info(prettify(global.settings))
 
-	if (settings.production) {
+	if (global.settings.production) {
 		checkUpdate()
 	}
 	else {
@@ -278,7 +278,7 @@ async function main(args) {
 			break
 
 		case CommandID.vcr:
-			cmdVCR(settings, params)
+			cmdVCR(global.settings, params)
 			break
 
 		case CommandID.follow:
@@ -290,7 +290,7 @@ async function main(args) {
 			break
 
 		case CommandID.live:
-			cmdLive(settings, params)
+			cmdLive(global.settings, params)
 			break
 
 		case CommandID.broadcast:
@@ -298,7 +298,7 @@ async function main(args) {
 			break
 
 		case CommandID.api:
-			cmdAPI(settings, params)
+			cmdAPI(global.settings, params)
 			break
 
 		case CommandID.fixdb:
@@ -311,7 +311,7 @@ async function main(args) {
 
 			_younow.openDB()
 				.then((db) => {
-					_fs.rename(settings.pathDB, settings.pathDB + ".tmp", err => {
+					_fs.rename(global.settings.pathDB, global.settings.pathDB + ".tmp", err => {
 						if (err) {
 							error(err)
 						}
@@ -343,12 +343,12 @@ async function main(args) {
 		case CommandID.debug:
 			//log(pkg)
 			//log(commander)
-			require("./cmd_debug").cmdDebug(settings, params)
+			require("./cmd_debug").cmdDebug(global.settings, params)
 			break
 
 		default:
 			log(`
-	Younow-tools version ${settings.version}
+	Younow-tools version ${global.settings.version}
 
 	As an open source project use it at your own risk. Younow can break it down at any time.
 

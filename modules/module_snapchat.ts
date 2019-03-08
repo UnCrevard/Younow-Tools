@@ -1,5 +1,5 @@
-import { getURL } from "./modules/module_www"
-import { log, error } from "./modules/module_log"
+import { getURL } from "../modules/module_www"
+import { log, error } from "../modules/module_log"
 
 const API_STORIES = "https://storysharing.snapchat.com"
 /**

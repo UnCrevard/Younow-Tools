@@ -46,7 +46,7 @@ export class VideoWriter {
 			})
 
 			this.ffmpeg.stderr.on("data", data => {
-				error(data.toString())
+				//error(data.toString())
 			})
 
 			this.ffmpeg.stdin.on("error", err => err)

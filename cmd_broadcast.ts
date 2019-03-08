@@ -1,7 +1,5 @@
-import { settings } from "./main"
-
 import { log, error } from "./modules/module_log"
-import * as _younow from "./module_younow"
+import * as _younow from "./modules/module_younow"
 import * as _async from "async"
 
 export function cmdBroadcast(bids: string[]) {

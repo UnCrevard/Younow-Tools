@@ -1,7 +1,7 @@
 import * as https from "https"
 import * as fs from "fs"
 import * as Request from "request"
-import { debug, error } from "./module_log"
+import { log, debug, error } from "./module_log"
 
 var fix: any = https
 
@@ -9,7 +9,7 @@ fix.globalAgent.keepAlive = true
 fix.globalAgent.keepAliveMsecs = 10000
 fix.globalAgent.maxSockets = 100
 
-function getFirefoxUserAgent(): string {
+export function getFirefoxUserAgent(): string {
 	let date = new Date()
 	let version = ((date.getFullYear() - 2018) * 4 + Math.floor(date.getMonth() / 4) + 58) + ".0"
 	return `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${version} Gecko/20100101 Firefox/${version}`
@@ -23,6 +23,7 @@ const config: Request.CoreOptions = {
 	{
 		"user-agent": getFirefoxUserAgent(),
 		"Accept-Language": "en-us, en; q=0.5"
+		,Accept:"*/*"
 	},
 	gzip: true,
 	encoding: null
@@ -103,13 +104,19 @@ export function post(url, form): Promise<any> {
  */
 export function download(url: string, filename: string): Promise<any> {
 	return new Promise((resolve, reject) => {
+
 		req(url)
 			.on("error", err => {
+				error("download.req", err)
 				reject(err)
 			})
 			.on("end", err => {
-				resolve(err)
 			})
 			.pipe(fs.createWriteStream(filename))
+			.on("error", err => {
+				error("download.pipe", err)
+				reject(err)
+			})
+			.on("finish", resolve)
 	})
 }

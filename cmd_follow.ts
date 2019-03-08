@@ -1,5 +1,4 @@
-import * as younow from "./module_younow"
-import { settings } from "./main"
+import * as younow from "./modules/module_younow"
 import { log, info, error, prettify } from "./modules/module_log"
 import { getURL } from "./modules/module_www"
 
@@ -96,7 +95,7 @@ export async function cmdFollow(users: string[]) {
 					.catch(error)
 			}
 
-			setInterval(monitor, settings.timeout * Utils.Time.MINUTE)
+			setInterval(monitor, global.settings.timeout * Utils.Time.MINUTE)
 			monitor()
 		})
 		.catch(error)

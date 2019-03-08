@@ -1,4 +1,4 @@
-import * as younow from "./module_younow"
+import * as younow from "./modules/module_younow"
 import { log, error } from "./modules/module_log"
 import * as _async from "async"
 import { getURL } from "./modules/module_www"

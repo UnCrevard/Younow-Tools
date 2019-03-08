@@ -1,8 +1,6 @@
-import { settings } from "./main"
-
 import { log, error } from "./modules/module_log"
-import { openDB, isUsernameInDB, convertToUserDB } from "./module_younow"
-import * as younow from "./module_younow"
+import { openDB, isUsernameInDB, convertToUserDB } from "./modules/module_younow"
+import * as younow from "./modules/module_younow"
 import * as _async from "async"
 
 export function cmdAdd(users: string[]) {

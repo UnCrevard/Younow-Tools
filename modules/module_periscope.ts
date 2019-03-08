@@ -1,12 +1,11 @@
-import { settings } from "./main"
 import * as path from "path"
 import * as url from "url"
-import { formatDateTime, cleanFilename } from "./modules/module_utils"
-import { log, error } from "./modules/module_log"
-import * as promisify from "./modules/module_promixified"
-import { hls } from "./modules/module_hls"
+import { formatDateTime, cleanFilename } from "./module_utils"
+import { log, error } from "./module_log"
+import * as promisify from "./module_promixified"
+import { hls } from "./module_hls"
 
-import { getURL, download } from "./modules/module_www"
+import { getURL, download } from "./module_www"
 
 export const PERISCOPE_URL = "www.pscp.tv"
 export const API = "https://proxsee.pscp.tv/api/v2/"
@@ -18,27 +17,28 @@ export function getBroadcast(bid): Promise<Periscope.VideoPublic> {
 }
 
 export function createFilename(broadcast: Periscope.Broadcast) {
-	return path.join(settings.pathDownload, `${broadcast.language || "XX"}_${broadcast.username}_${formatDateTime(new Date(broadcast.created_at))}${broadcast.state == "ENDED" ? "" : "_live"}_${cleanFilename(broadcast.status)}`)
+	return `${broadcast.language || "XX"}_${broadcast.username}_${formatDateTime(new Date(broadcast.created_at))}${broadcast.state == "ENDED" ? "" : "_live"}_${cleanFilename(broadcast.status)}`
 }
 
 export function downloadVideo(filename: string, video: Periscope.VideoPublic) {
 	if (video.replay_url) {
 
 		return new Promise(resolve => {
-			hls(video.replay_url, filename, settings.useFFMPEG, video.broadcast.camera_rotation, false, resolve)
+			hls(video.replay_url, filename, global.settings.useFFMPEG, video.broadcast.camera_rotation, false, resolve)
 		})
 	}
 	else {
 		return new Promise(resolve => {
-			hls(video.https_hls_url, filename, settings.useFFMPEG, video.broadcast.camera_rotation, true, resolve)
+			hls(video.https_hls_url, filename, global.settings.useFFMPEG, video.broadcast.camera_rotation, true, resolve)
 		})
 	}
 }
 
-export async function downloadThumbnail(broadcast: Periscope.Broadcast) {
+export async function downloadThumbnail(filename, broadcast: Periscope.Broadcast) {
+
 	if (!broadcast.image_url) return false
 
-	return download(broadcast.image_url, createFilename(broadcast) + ".jpg")
+	return download(broadcast.image_url, filename)
 }
 
 export function downloadProfile(broadcast: Periscope.Broadcast) {

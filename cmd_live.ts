@@ -6,10 +6,11 @@ import { hls } from "./modules/module_hls"
 import { cleanFilename } from "./modules/module_utils"
 import * as dos from "./modules/module_promixified"
 import * as fs from "fs"
-import * as path from "path"
+import * as _path from "path"
 
-import * as _younow from "./module_younow"
-import * as periscope from "./module_periscope"
+import * as _younow from "./modules/module_younow"
+import * as periscope from "./modules/module_periscope"
+import * as _vk from "./modules/module_vk"
 
 export function cmdLive(settings: Settings, users: string[]) {
 
@@ -53,53 +54,37 @@ export function cmdLive(settings: Settings, users: string[]) {
 			getURL(user, null)
 				.then(async body => {
 
-					let m = body.toString().match(/playerParams.=.(.+?);\n/)
+					let broadcast=await _vk.getBroadcast(user)
 
-					if (m) {
-						let json: VK.VarParams = JSON.parse(m[1])
-						let params = json.params[0]
+					let basename=_path.join(settings.pathDownload,_vk.CreateFilename(broadcast)+".")
 
-						let basename = path.join(settings.pathDownload, cleanFilename(params.md_author +
-							"_" + params.md_title +
-							"_" + params.vid +
-							"_" + params.oid)) + "."
+					if (broadcast.mp4 || broadcast.postlive_mp4) {
 
+						// archived live
+						log("download archived live", user)
 
-						if (params.mp4 || params.postlive_mp4) {
-
-							// archived live
-							log("download archived live", user)
-
-							await download(params.mp4 || params.postlive_mp4, basename + "mp4")
-						}
-						else if (params.hls) {
-
-							// live stream
-
-							log("download live", user)
-
-							let playlist = params.hls.split("?extra=")[0]
-
-							if (settings.thumbnail) {
-
-								await download(params.jpg, basename + "jpg")
-							}
-
-							if (settings.json) {
-								dos.writeFile(basename + "json", JSON.stringify(json, null, "\t")).catch(error)
-							}
-
-							hls(playlist, basename + settings.videoFormat, settings.useFFMPEG, 0, true, cb)
-						}
+						await download(broadcast.mp4 || broadcast.postlive_mp4, basename + "mp4")
 					}
-					else {
+					else if (broadcast.hls) {
 
-						/*
-						<div id="video_ext_msg">
-						This video has been removed from public access.
-						</div>
-						 */
-						log(body.toString().match(/<div.id="video_ext_msg">\s*(.+?)\s*<\/div>/)[1])
+						// live stream
+
+						log("download live", user)
+
+						//@todo
+
+						let playlist = broadcast.hls.split("?extra=")[0]
+
+						if (settings.thumbnail) {
+
+							await download(broadcast.jpg, basename + "jpg")
+						}
+
+						if (settings.json) {
+							dos.writeFile(basename + "json", JSON.stringify(broadcast, null, "\t")).catch(error)
+						}
+
+						hls(playlist, basename + settings.videoFormat, settings.useFFMPEG, 0, true, cb)
 					}
 				})
 				.catch(error)
@@ -126,10 +111,10 @@ export function cmdLive(settings: Settings, users: string[]) {
 
 					log("download", video.broadcast.user_display_name, video.broadcast.status)
 
-					let basename = periscope.createFilename(video.broadcast)
+					let basename = _path.join(settings.pathDownload,periscope.createFilename(video.broadcast))
 
 					if (settings.thumbnail) {
-						periscope.downloadThumbnail(video.broadcast).catch(error)
+						periscope.downloadThumbnail(basename+".jpg",video.broadcast).catch(error)
 					}
 					if (settings.json) {
 						dos.writeFile(basename + ".json", JSON.stringify(video, null, "\t")).catch(error)

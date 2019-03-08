@@ -1,6 +1,5 @@
-import { settings } from "./main"
 import { log, error } from "./modules/module_log"
-import * as younow from "./module_younow"
+import * as younow from "./modules/module_younow"
 import * as _async from "async"
 
 export function cmdAnnotation(user: string, note: string) {

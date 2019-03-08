@@ -1,6 +1,6 @@
-import * as _younow from "./module_younow"
-import * as snapchat from "./module_snapchat"
-import * as periscope from "./module_periscope"
+import * as _younow from "./modules/module_younow"
+import * as snapchat from "./modules/module_snapchat"
+import * as periscope from "./modules/module_periscope"
 
 import * as _async from "async"
 import { log, info, debug, error, prettify } from "./modules/module_log"
@@ -31,8 +31,9 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 									_younow.getMoments(uid, n)
 										.then((moments) => {
 											if (moments.errorCode == 0) {
+
 												for (let moment of moments.items) {
-													if (moment.broadcaster.userId == uid) {
+													if (moment.broadcaster.userId) {
 														downloadableMoments.push(moment)
 													}
 												}
@@ -165,7 +166,7 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 									try {
 										let tokens = dataStore.SessionToken
 										let users = dataStore.UserCache.users
-										let broadcasts = dataStore.BroadcastCache.Broadcasts
+										let broadcasts = dataStore.BroadcastCache.broadcasts
 
 										if (!tokens || !users) {
 											throw "SessionToken or user is missing";
@@ -197,15 +198,17 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 																			if (video.broadcast.available_for_replay) {
 																				//let cookies=replay.cookies.map(x=>`${x.Name}=${x.Value};`).join("")
 
+																				let basename=periscope.createFilename(video.broadcast)
+
 																				if (settings.thumbnail) {
-																					periscope.downloadThumbnail(video.broadcast).catch(error)
+																					periscope.downloadThumbnail(basename+".jpg",video.broadcast).catch(error)
 																				}
 
 																				if (settings.json) {
-																					dos.writeFile(periscope.createFilename(video.broadcast) + "." + "json", JSON.stringify(video, null, "\t")).catch(error)
+																					dos.writeFile(basename + ".json", JSON.stringify(video, null, "\t")).catch(error)
 																				}
 
-																				return periscope.downloadVideo(periscope.createFilename(video.broadcast) + "." + settings.videoFormat, video)
+																				return periscope.downloadVideo(basename + "." + settings.videoFormat, video)
 																					.then(bool => {
 																						db[video.broadcast.id] = video.broadcast
 																					})

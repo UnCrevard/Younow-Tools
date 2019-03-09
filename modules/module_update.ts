@@ -6,7 +6,7 @@ export const checkUpdate = async function() {
 	try {
 		const registry = `https://registry.npmjs.org/younow-tools/latest`
 
-		const local: Package = require("../package.json")
+		const local: Package = require("../../package.json")
 		let current: Package = await getURL(registry)
 
 		if (local.version < current.version) {

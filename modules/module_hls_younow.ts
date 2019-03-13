@@ -1,5 +1,5 @@
 import * as Progress from "progress"
-import { log, info, error } from "./module_log"
+import { log, info, error, debug } from "./module_log"
 import { VideoWriter } from "./module_ffmpeg"
 import { getURL } from "./module_www"
 import { noop } from "./module_utils"
@@ -62,6 +62,9 @@ export function downloadSegments(settings: Settings, url: string,
 							}
 							else {
 								stream.close(err => {
+
+									debug("downloadSegment stream.close",err)
+
 									resolve(err)
 								})
 							}

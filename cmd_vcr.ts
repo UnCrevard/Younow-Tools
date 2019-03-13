@@ -33,7 +33,11 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 											if (moments.errorCode == 0) {
 
 												for (let moment of moments.items) {
+
+
+
 													if (moment.broadcaster.userId) {
+														info(moment.broadcaster.name,moment.broadcastId,formatDateTime(new Date(moment.created*1000)));
 														downloadableMoments.push(moment)
 													}
 												}
@@ -62,16 +66,17 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 										callback_users()
 									}
 									else {
-										_async.eachSeries(downloadableMoments.reverse(), function(moment, callback_moments) {
+
+										// download broadcast one by one
+
+										_async.eachSeries(downloadableMoments.reverse(),function(moment, callback_moments) {
 											_younow.downloadArchive(userinfo, moment.broadcastId, moment.created)
 												.then(result => {
 													callback_moments()
 												}, err => {
 													error(err)
-													return false
+													callback_moments(null)
 												})
-
-
 										}, callback_users)
 									}
 								})

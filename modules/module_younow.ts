@@ -178,6 +178,9 @@ export async function downloadArchive(user: Younow.UserInfo | DBUser, bid: numbe
 	let exists = await P.exists(video_filename)
 
 	if (!exists) {
+
+		return HLS(archive.hls,video_filename,0,global.settings.parallelDownloads)
+
 		return getURL(archive.hls, "utf8")
 			//@ts-ignore
 			.then((playlist: string) => {
@@ -239,169 +242,21 @@ export async function downloadThemAll(live: Younow.LiveBroadcast) {
 	}
 }
 
-/**
- * @todo cleanup
- * downloadLiveStream- download live broadcast
- * returns Promise<whatever>
- */
-
-/*
-export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
-	if (live.errorCode == 0) {
-		let filename = createFilename(live) + "." + global.settings.videoFormat
-
-		let exists = await dos.exists(filename)
-
-		if (!exists) {
-			return getPlaylist(live.broadcastId)
-				.then((playlist: string) => {
-					let m = playlist.match(/https:.+\d+.ts/gi)
-
-					if (m) {
-						debug(`M3U8 ${m.length} ${m[1]}`)
-
-						m = m.pop().match(/(https:.+\/)(\d+).ts/i)
-
-						if (m) {
-							let url = m[1]
-							let current_segment = Number(m[2])
-
-							info(`REWIND ${live.user.profileUrlString}`)
-
-							return downloadSegments(settings, url, filename, current_segment, null, true)
-								.then((stream: VideoWriter) => {
-									if (!stream) {
-										debug(`STREAM null ${live.user.profileUrlString} ${stream}`)
-										return false
-									}
-
-									return new Promise((resolve, reject) => {
-										info(`STREAM ${live.user.profileUrlString}`)
-
-										let interval = 0
-										let fail = 0
-										let step = 250
-										let slow_down = 0.01
-
-										_async.forever(next => {
-											getURL(`${url}${current_segment}.ts`, null)
-												.then(buffer => {
-													fail = 0
-
-													interval = interval - interval * slow_down
-
-													current_segment++
-
-													stream.write(buffer, err => {
-														setTimeout(next, interval)
-													})
-												}, err => {
-
-													fail++
-
-													if (fail < 10 && err == 403) {
-														interval += step
-
-														debug(`STREAM ERROR ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
-
-														setTimeout(next, interval)
-													}
-													else {
-														debug(`STREAM ABORT ${live.user.profileUrlString} Err:${err} Fail:${fail} Interval:${interval}`)
-														next(true)
-													}
-												})
-										}, err => {
-											stream.close(err => {
-												resolve(true) // @WTF
-											})
-										})
-									})
-								}, err => err)
-								.then(err => {
-									debug(`STREAM MOVE ${live.user.profileUrlString} Err:${err}`)
-
-									return new Promise(resolve => {
-										setTimeout(() => {
-											resolve(moveFile(filename))
-										}, 10000)
-									})
-								})
-						}
-						else {
-							error(playlist)
-							return false
-						}
-					}
-					else {
-						error(playlist)
-						return false
-					}
-				})
-		}
-	}
-}
-*/
-
-export async function downloadLiveStream(live: Younow.LiveBroadcast): Promise<any> {
-
-	//20180523 : using rtmp stream instead of HLS after younow change.
-
-	if (live.errorCode == 0) {
-
-		return new Promise(async (resolve, reject) => {
-			let filename = createFilename(live) + "." + global.settings.videoFormat
-
-			let exists = await P.exists(filename)
-
-			if (!exists) {
-				let params = `-i rtmp://${live.media.host}${live.media.app}/${live.media.stream} ${global.settings.useFFMPEG} ${filename}`.split(" ")
-
-				let ffmpeg = spawn("ffmpeg", params)
-
-				ffmpeg.on("error", err => {
-					reject(err)
-				})
-
-				ffmpeg.on("exit", code => {
-					if (code) {
-						error(`FFMPEG exit ${code}`)
-					}
-				})
-
-				ffmpeg.on("close", code => {
-
-					moveFile(filename).
-						then(err => {
-							resolve("ok")
-						})
-						.catch(err => {
-							reject(err)
-						})
-				})
-
-				ffmpeg.stderr.on("data", data => {
-					//log(data.toString())
-				})
-
-				ffmpeg.stdin.on("error", err => err)
-			}
-		});
-
-	}
-	else {
-		return Promise.reject(live.errorMsg)
-	}
-}
-
 /*
 
-
+	downloadLiveStream : rtmp version (useless)
 
 */
 
-// 20190305 younow update no more flash
-// the new trick is to wait for the end of the broadcast then download it.
+
+/*
+
+	downloadLiveStreamFix
+
+	20190305 younow update no more flash
+	the new trick is to wait for the end of the broadcast then download it.
+
+	*/
 
 async function downloadLiveStreamFix(live: Younow.LiveBroadcast) {
 
@@ -426,8 +281,6 @@ async function downloadLiveStreamFix(live: Younow.LiveBroadcast) {
 		else if (broadcast.errorCode == 0) {
 			try {
 				if (!broadcast.videoAvailable || broadcast.noLongerAvailable) throw "video is gone"
-
-				// let url=`https://cdn.younow.com/php/api/broadcast/videoPath/hls=1/broadcastId=${live.broadcastId}`
 
 				live["hls"] = true // fake replay
 

@@ -143,7 +143,11 @@ export function getTrendings(): Promise<Younow.Trendings> {
 
 export function getTagInfo(tag): Promise<Younow.TagInfo> {
 
-	return getURL(`https://playdata.younow.com/live/tags/${Buffer.from(tag).toString("base64")}.json`)
+	// update 20190616
+
+	return getURL(`${API}/php/api/younow/queue/locale=en/numberOfRecords=50/startFrom=0/tag=${encodeURIComponent(tag)}`)
+
+	// return getURL(`https://playdata.younow.com/live/tags/${Buffer.from(tag).toString("base64")}.json`)
 }
 
 /**

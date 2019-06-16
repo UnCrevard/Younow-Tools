@@ -58,13 +58,15 @@ function update_scan(db: DB, streams: Array<any>) {
 						if (infos.errorCode) {
 							throw new Error(`${tag} ${infos.errorCode} ${infos.errorMsg}`)
 						}
-						else if (!infos.items) {
+						else if (!infos.queues && !infos.queues[0].items) {
+							debug(prettify(infos))
+							debug("TagInfo.items is empty")
 							return
 						}
 
-						info(`Tag:${tag} Users:${infos.items.length}`)
+						info(`Tag:${tag} Users:${infos.queues[0].items.length}`)
 
-						infos.items.forEach(function(user) {
+						infos.queues[0].items.forEach(function(user) {
 							function showInfos(result, user, liveuser) {
 								info(`1ST Result ${result} ${liveuser.check}:${liveuser.infos ? "*" : ""} ${user.profile} BC:${liveuser.infos && liveuser.infos.broadcastsCount} LVL:${user.userlevel} VW:${user.viewers}/${user.views} Language:${user.l}`)
 							}

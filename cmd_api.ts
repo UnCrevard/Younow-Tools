@@ -1074,7 +1074,7 @@ export async function cmdAPI(settings: Settings, params: any) {
 
 			if (tagInfo.errorCode) throw "getTagInfo fail"
 
-			let user = tagInfo.items[0] // pick up a user
+			let user = tagInfo.queues[0].items[0] // pick up a user
 
 			log(`getLiveBroadcastByUID:${await younow.getLiveBroadcastByUID(user.userId).then(x => x.errorCode ? x.errorMsg : "OK", error)}`)
 			log(`getLiveBroadcastByUsername:${await younow.getLiveBroadcastByUsername(user.profile).then(x => x.errorCode ? x.errorMsg : "OK", error)}`)

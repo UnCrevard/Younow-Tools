@@ -19,15 +19,15 @@
     "type": "git"
   },
   "dependencies": {
-    "async": "^2.6.1",
-    "commander": "^2.15.1",
-    "progress": "^2.0.0",
-    "request": "^2.87.0"
+    "async": "^2.6.3",
+    "commander": "^2.20.3",
+    "progress": "^2.0.3",
+    "request": "^2.88.2"
   },
   "devDependencies": {
-    "@types/async": "^2.0.49",
+    "@types/async": "^2.4.2",
     "@types/commander": "^2.12.2",
-    "@types/node": "^7.0.69",
+    "@types/node": "^7.10.9",
     "@types/progress": "^1.1.28",
     "@types/request": "0.0.42",
     "source-map-support": "^0.4.18"
@@ -36,6 +36,9 @@
     "node": ">=6.10.2"
   },
   "changelog": {
+    "1.0.40": [
+      "fix follow after update"
+    ],
     "1.0.36": [
       "quick hack to make it works with the last younow update"
     ],

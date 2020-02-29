@@ -1,14 +1,22 @@
 {
 	"compilerOptions":
 	{
-		"module": "commonjs",
-		"target": "es6",
-		"noImplicitAny": false,
-		"inlineSourceMap": true,
-		"outDir": "js/",
-		"removeComments": true,
+		"module": "commonjs"
+		,"target": "es6"
+		,"noImplicitAny": false
+
+		// source map
+		,"sourceMap":true
+		//,"inlineSources":true
+		//,"inlineSourceMap": true
+
+		//
+		,"outDir": "js/"
+
+		,"removeComments": true
+
 		//"allowSyntheticDefaultImports": true,
-		"typeRoots" : ["../__Typing/"],
+		,"typeRoots" : ["../__Typing/"]
 		//"noEmitOnError":true
 	},
 	"exclude": [

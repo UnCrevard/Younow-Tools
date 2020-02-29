@@ -16,6 +16,9 @@ To update younow-tools just type :
 
 ### Change log
 
+20200229/1.0.40
+	update after the update.
+
 20190308/1.0.36
 
 	after the last update younow is not using flash anymore to stream (rtmp)

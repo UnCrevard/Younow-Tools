@@ -58,9 +58,9 @@ function update_scan(db: DB, streams: Array<any>) {
 						if (infos.errorCode) {
 							throw new Error(`${tag} ${infos.errorCode} ${infos.errorMsg}`)
 						}
-						else if (!infos.queues && !infos.queues[0].items) {
-							debug(prettify(infos))
-							debug("TagInfo.items is empty")
+						else if (!(infos.queues && infos.queues[0].items)) {
+							error("TagInfo.items is empty")
+							error(prettify(infos))
 							return
 						}
 

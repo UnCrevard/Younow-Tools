@@ -47,10 +47,10 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 												if (moments.hasMore && moments.items.length) // fix
 												{
 													n = moments.items[moments.items.length - 1].created
-													next(false)
+													next(null)
 												}
 												else {
-													next(true)
+													next(new Error("FAIL"))
 												}
 											}
 											else {
@@ -59,7 +59,7 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 										})
 										.catch(err => {
 											error(err)
-											next(false)
+											next(null)
 										})
 								}, function(err) {
 									if (downloadableMoments.length == 0) {
@@ -118,7 +118,8 @@ export async function cmdVCR(settings: Settings, users: string[]) {
 
 							log("download", snap.title, snap.media.type)
 
-							let basename = path.join(settings.pathDownload, `${cleanFilename(stories.story.metadata.title)}_${formatDateTime(new Date(snap.captureTimeSecs * Time.MILLI))}`)
+							let basename = path.join(settings.pathDownload,
+								cleanFilename(`${stories.story.id}_${formatDateTime(new Date(snap.captureTimeSecs * Time.MILLI))}${snap.title?"_"+snap.title:""}`))
 
 							let filenameVideo = basename + ".mp4"
 							let filenameImage = basename + ".jpg"

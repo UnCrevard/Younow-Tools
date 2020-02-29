@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -31,4 +32,4 @@ exports.checkUpdate = function () {
         }
     });
 };
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibW9kdWxlX3VwZGF0ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uL21vZHVsZXMvbW9kdWxlX3VwZGF0ZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7O0FBQUEsc0RBQThDO0FBQzlDLHNEQUErRDtBQUdsRCxRQUFBLFdBQVcsR0FBRzs7UUFDMUIsSUFBSTtZQUNILE1BQU0sUUFBUSxHQUFHLGdEQUFnRCxDQUFBO1lBRWpFLE1BQU0sS0FBSyxHQUFZLE9BQU8sQ0FBQyxvQkFBb0IsQ0FBQyxDQUFBO1lBQ3BELElBQUksT0FBTyxHQUFZLE1BQU0sbUJBQU0sQ0FBQyxRQUFRLENBQUMsQ0FBQTtZQUU3QyxJQUFJLEtBQUssQ0FBQyxPQUFPLEdBQUcsT0FBTyxDQUFDLE9BQU8sRUFBRTtnQkFFcEMsa0JBQUssQ0FBQyx3QkFBd0IsQ0FBQyxDQUFBO2dCQUMvQixrQkFBSyxDQUFDLG9CQUFvQixPQUFPLENBQUMsSUFBSSxpQkFBaUIsT0FBTyxDQUFDLE9BQU8sRUFBRSxDQUFDLENBQUE7Z0JBRXpFLElBQUksT0FBTyxDQUFDLE9BQU8sSUFBSSxPQUFPLENBQUMsU0FBUyxFQUFFO29CQUN6QyxnQkFBRyxDQUFFLE9BQU8sQ0FBQyxTQUFTLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBUyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQyxDQUFBO2lCQUMzRDtnQkFDRCxrQkFBSyxDQUFDLDhCQUE4QixPQUFPLENBQUMsSUFBSSxFQUFFLENBQUMsQ0FBQTtnQkFDbkQsa0JBQUssQ0FBQyx3QkFBd0IsQ0FBQyxDQUFBO2FBQy9CO1NBQ0Q7UUFDRCxPQUFPLEdBQUcsRUFBRTtZQUNYLGtCQUFLLENBQUMsYUFBYSxFQUFFLEdBQUcsQ0FBQyxDQUFBO1NBQ3pCO0lBQ0YsQ0FBQztDQUFBLENBQUEifQ==
+//# sourceMappingURL=module_update.js.map

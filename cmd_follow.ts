@@ -5,7 +5,7 @@ import { getURL } from "./modules/module_www"
 interface LiveBroadcasters {
 	[index: number]:
 	{
-		status: number
+		status: string
 	}
 }
 
